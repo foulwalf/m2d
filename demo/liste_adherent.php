@@ -84,7 +84,7 @@ $data = $req->fetchAll();
             <div id="mensuel">
               <div class="mb-3">
                 <label for="typeCotisation" class="col-form-label">Mois</label>
-                <select required class="form-select" aria-label=".form-select-lg example">
+                <select required class="form-select" aria-label=".form-select-lg example" name="mois">
                   <option selected>...</option>
                   <option value="1">Janvier</option>
                   <option value="2">Février</option>
@@ -108,7 +108,7 @@ $data = $req->fetchAll();
           </div>
           <div class="modal-footer">
             <button type="reset" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
-            <button type="submit" name="ajouter_cotisation_mensuel" class="btn btn-primary">Ajouter</button>
+            <button type="submit" name="ajouter_cotisation_mensuelle" class="btn btn-primary">Ajouter</button>
           </div>
         </form>
 

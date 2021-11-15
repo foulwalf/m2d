@@ -14,8 +14,19 @@ if (isset($_POST)) {
                 $result = $inf->fetchAll();
                 echo json_encode($result);
                 break;
-            case '':
-                
+            case 'getCotisationMensuelle':
+                include('connexion.php');
+                $inf = $pdo->prepare("SELECT * FROM adherent JOIN cotisation_mensuelle ON adherent.id_adherent = cotisation_mensuelle.adherent WHERE MOIS_COTISATION = ? AND ANNEE_COTISATION = ?");
+                $inf->execute([$_POST['mois'], $_POST['annee']]);
+                $result = $inf->fetchAll(PDO::FETCH_ASSOC);
+                echo json_encode($result);
+                break;
+            case 'getCotisationDeces':
+                include('connexion.php');
+                $inf = $pdo->prepare("SELECT * FROM adherent JOIN cotisation_deces ON adherent.id_adherent = cotisation_deces.adherent WHERE deces = ?");
+                $inf->execute([$_POST['deces']]);
+                $result = $inf->fetchAll(PDO::FETCH_ASSOC);
+                echo json_encode($result);
                 break;
             default:
                 # code...
@@ -26,6 +37,15 @@ if (isset($_POST)) {
         $inf = $pdo->prepare("INSERT INTO cotisation_deces(DATE_COTISATION, MONTANT_COTISATION, deces, adherent) VALUES (?,?,?,?)");
         $exec = $inf->execute(
             [date('Y-m-d'), $_POST['montant'], $_POST['deces_conc'], $_POST['adherent']]
+        );
+        if ($exec) {
+            echo "<script>alert('Cotisation enregistrée');location.href =\"index.php?id=liste_adherent.php\"</script>";
+        }
+    } else if (isset($_POST['ajouter_cotisation_mensuelle'])) {
+        include('connexion.php');
+        $inf = $pdo->prepare("INSERT INTO cotisation_mensuelle(MOIS_COTISATION, MONTANT_COTISATION, ANNEE_COTISATION, adherent) VALUES (?,?,?,?,?)");
+        $exec = $inf->execute(
+            [$_POST['mois'], $_POST['montant'], date('Y'), $_POST['deces_conc'], $_POST['adherent']]
         );
         if ($exec) {
             echo "<script>alert('Cotisation enregistrée');location.href =\"index.php?id=liste_adherent.php\"</script>";

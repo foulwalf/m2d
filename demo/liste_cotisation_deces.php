@@ -1,22 +1,7 @@
 <?php
-$date = new DateTime();
-$month = $date->format("m");
-$year = $date->format("Y");
-$month_array = [
-  1 => "Janvier",
-  2 => "Février",
-  3 => "Mars",
-  4 => "Avril",
-  5 => "Mai",
-  6 => "Juin",
-  7 => "Juillet",
-  8 => "Août",
-  9 => "Septembre",
-  10 => "Octobre",
-  11 => "Novembre",
-  12 => "Décembre"
-];
-$month_array_keys = array_keys($month_array);
+include('connexion.php');
+$inf = $pdo->query("SELECT * FROM deces JOIN adherent ON id_adherent = deces.adherent ");
+$results = $inf->fetchAll();
 ?>
 <!DOCTYPE html>
 <html lang="fr">
@@ -53,36 +38,25 @@ $month_array_keys = array_keys($month_array);
       <div class="content-wrapper">
         <div class="card">
           <div class="card-body">
-            <h4 class="card-title">Cotisations mensuelles</h4>
+            <h4 class="card-title">Cotisations de décès</h4>
             <div class="row">
               <div class="col-12">
                 <div class="row">
                   <div class="row">
                     <div class="col-4">
                       <div>
-                        <select class="form-select" id="mois" aria-label="Floating label select example">
+                        <select class="form-select" id="deces" aria-label="Floating label select example">
                           <option selected value="">...</option>
-                          <?php foreach ($month_array_keys as $key) { ?>
-                            <option value="<?= $key ?>"><?= $month_array[$key] ?></option>
+                          <?php foreach ($results as $deces) { ?>
+                            <option value="<?= $deces['ID_DECES'] ?>"><?= $deces['nom_adherent']." ".$deces['prenom_adherent']?></option>
                           <?php } ?>
                         </select>
-                        <label for="floatingSelect">Mois<span style="color:red">*</span></label>
-                      </div>
-                    </div>
-                    <div class="col-4">
-                      <div class="">
-                        <select class="form-select" id="annee" aria-label="Floating label select example">
-                          <option selected value="">...</option>
-                          <?php for ($i = 2021; $i <= $year; $i++) { ?>
-                            <option value="<?= $i ?>"><?= $i ?></option>
-                          <?php } ?>
-                        </select>
-                        <label for="floatingSelect">Année<span style="color:red">*</span></label>
+                        <label for="floatingSelect">Décès<span style="color:red">*</span></label>
                       </div>
                     </div>
                     <div class="col">
                       <button class="btn btn-primary disabled" id="vbtn">Valider</button>
-                      <button class="btn btn-primary disabled" id="ibtn">Imprimer</button>
+                      <button class="btn btn-primary disabled" id="btn">Impriper</button>
                     </div>
                   </div>
                 </div>
@@ -99,6 +73,14 @@ $month_array_keys = array_keys($month_array);
                       </tr>
                     </thead>
                     <tbody id="table_body">
+                      <tr>
+                        <td>1</td>
+                        <td>2012/08/03</td>
+                        <td>Edinburgh</td>
+                        <td>New York</td>
+                        <td>$1500</td>
+                        <td>$3200</td>
+                      </tr>
                     </tbody>
                   </table>
                 </div>
@@ -134,30 +116,20 @@ $month_array_keys = array_keys($month_array);
   <script src="../js/data-table.js"></script>
   <!-- End custom js for this page-->
   <script>
-    var mois = document.getElementById('mois')
-    var annee = document.getElementById('annee')
+    var deces = document.getElementById('deces')
     var vbtn = document.getElementById('vbtn')
     var tbody = document.getElementById('table_body')
     var tbody_content = document.getElementById('tbody_content')
     var data;
-    var set = {
-      mois: null,
-      annee: null
-    }
-    mois.addEventListener('change', function(e) {
-      set.mois = mois.value
-      console.log(set.mois)
-      ennabledButton()
-    })
-    annee.addEventListener('change', function(e) {
-      set.annee = annee.value
+    var deces_id;
+    deces.addEventListener('change', function(e) {
+      deces_id = deces.value
       ennabledButton()
     })
     vbtn.addEventListener('click', function() {
       const data = {
-        'method': 'getCotisationMensuelle',
-        'mois': set.mois,
-        'annee': set.annee,
+        'method': 'getCotisationDeces',
+        'deces': deces_id
       }
       fetch('function.php', {
           method: 'POST',
@@ -179,7 +151,7 @@ $month_array_keys = array_keys($month_array);
     })
 
     function ennabledButton() {
-      if ((set.mois !== null && set.annee !== null) && (set.mois !== "" && set.annee !== "")) {
+      if (deces.value !== null && deces.value !== '') {
         document.getElementById("vbtn").classList.remove('disabled')
       } else {
         document.getElementById("vbtn").classList.add('disabled')
@@ -192,7 +164,7 @@ $month_array_keys = array_keys($month_array);
       if (param == null) {
         content += `
           <tr>
-            <td colspan="6" align="center"><b>AUNCUNE INFORMATION TROUV&Eacute;E POUR CETTE P&Eacute;RIODE</b></td>
+            <td colspan="6" align="center"><b>AUNCUNE INFORMATION TROUV&Eacute;E POUR CE D&Eacute;C&Egrave;S</b></td>
           </tr>`;
       } else {
         for (obj in param) {
