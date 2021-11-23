@@ -1,6 +1,11 @@
 <?php
 include('connexion.php');
-$req = $pdo->query("select * from adherent where id_adherent not in (select adherent from deces)");
+if ($_SESSION['role']=='admin') {
+  $req = $pdo->query("SELECT * from adherent join commune on adherent.commune = commune.ID_COMMUNE where id_adherent not in (select adherent from deces)");
+} else{
+  $req = $pdo->prepare("SELECT * from adherent join commune on commune.ID_COMMUNE = adherent.commune where id_adherent not in (select adherent from deces) and adherent.commune = ?");
+  $req->execute([$_SESSION['user_commune']]);
+}
 $data = $req->fetchAll();
 
 ?>
@@ -168,7 +173,7 @@ $data = $req->fetchAll();
                         <th>Nom et Prénom</th>
                         <th>Contact</th>
                         <th>Email</th>
-                        <th>Quartier</th>
+                        <th>Commune</th>
                         <th>Entreprise</th>
                         <th colspan="3">
                           <center>Actions</center>
@@ -184,7 +189,7 @@ $data = $req->fetchAll();
                         echo "<td><strong>$v[nom_adherent] $v[prenom_adherent]</strong></td>";
                         echo "<td><strong>$v[contact_adherent]</strong></td>";
                         echo "<td><strong>$v[email_adherent]</strong></td>";
-                        echo "<td><strong>$v[commune]</strong></td>";
+                        echo "<td><strong>$v[NOM_COMMUNE]</strong></td>";
                         echo "<td><strong>$v[entreprise_adherent]</strong></td>";
                         echo "<td><a href=index.php?id=update_adherent.php&id1=$v[id_adherent]><button class='btn btn-secondary'>Modifier les infos</button></a></td>";
                         echo "<td><button class='btn btn-primary cotisation dropdown-toggle' type=button id=dropdownMenuButton1>Cotisations

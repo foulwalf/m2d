@@ -1,4 +1,21 @@
 <?php
+$date = new DateTime();
+$month = $date->format("m");
+$year = $date->format("Y");
+$month_array = [
+  1 => "Janvier",
+  2 => "Février",
+  3 => "Mars",
+  4 => "Avril",
+  5 => "Mai",
+  6 => "Juin",
+  7 => "Juillet",
+  8 => "Août",
+  9 => "Septembre",
+  10 => "Octobre",
+  11 => "Novembre",
+  12 => "Décembre"
+];
 include('connexion.php');
 $req=$pdo->query("select count(id_adherent) as nb from adherent");
 $data=$req->fetch();
@@ -6,6 +23,10 @@ $req1=$pdo->query("select count(id_adherent) as nbM from adherent where sexe_adh
 $data1=$req1->fetch();
 $req2=$pdo->query("select count(id_adherent) as nbF from adherent where sexe_adherent='F'");
 $data2=$req2->fetch();
+$req3=$pdo->prepare("select SUM(MONTANT_COTISATION) as cota from cotisation_mensuelle where MOIS_COTISATION=? and ANNEE_COTISATION = ?");
+$req3->execute([$month, $year]);
+$data3=$req3->fetch();
+var_dump($data3);
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -62,8 +83,8 @@ $data2=$req2->fetch();
                   <div class="card card-dark-blue">
                     <div class="card-body">
                       <p class="mb-4">COTISATION MENSUEL</p>
-                      <p class="fs-30 mb-2">61344</p>
-                      <p>22.00% (30 days)</p>
+                      <p class="fs-30 mb-2"><?= $data3['cota']==null?'0 FCFA':$data3['cota'].' FCFA'?></p>
+                      <p><?= $month_array[$month].' '.$year ?></p>
                     </div>
                   </div>
                 </div>

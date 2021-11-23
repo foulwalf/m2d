@@ -16,15 +16,25 @@ if (isset($_POST)) {
                 break;
             case 'getCotisationMensuelle':
                 include('connexion.php');
-                $inf = $pdo->prepare("SELECT * FROM adherent JOIN cotisation_mensuelle ON adherent.id_adherent = cotisation_mensuelle.adherent WHERE MOIS_COTISATION = ? AND ANNEE_COTISATION = ?");
-                $inf->execute([$_POST['mois'], $_POST['annee']]);
+                if ($_SESSION['role'] == 'admin') {
+                    $inf = $pdo->prepare("SELECT * FROM adherent JOIN cotisation_mensuelle ON adherent.id_adherent = cotisation_mensuelle.adherent JOIN commune ON adherent.commune = commune.ID_COMMUNE WHERE MOIS_COTISATION = ? AND ANNEE_COTISATION = ?");
+                    $inf->execute([$_POST['mois'], $_POST['annee']]);
+                } else {
+                    $inf = $pdo->prepare("SELECT * FROM adherent JOIN cotisation_mensuelle ON adherent.id_adherent = cotisation_mensuelle.adherent JOIN commune ON adherent.commune = commune.ID_COMMUNE WHERE MOIS_COTISATION = ? AND ANNEE_COTISATION = ? AND adherent.commune = ?");
+                    $inf->execute([$_POST['mois'], $_POST['annee'], $_SESSION['user_commune']]);
+                }
                 $result = $inf->fetchAll(PDO::FETCH_ASSOC);
                 echo json_encode($result);
                 break;
             case 'getCotisationDeces':
                 include('connexion.php');
-                $inf = $pdo->prepare("SELECT * FROM adherent JOIN cotisation_deces ON adherent.id_adherent = cotisation_deces.adherent WHERE deces = ?");
-                $inf->execute([$_POST['deces']]);
+                if ($_SESSION['role'] == 'admin') {
+                    $inf = $pdo->prepare("SELECT * FROM adherent JOIN cotisation_deces ON adherent.id_adherent = cotisation_deces.adherent JOIN commune ON adherent.commune = commune.ID_COMMUNE WHERE cotisation_deces.deces = ?");
+                    $inf->execute([$_POST['deces']]);
+                } else {
+                    $inf = $pdo->prepare("SELECT * FROM adherent JOIN cotisation_deces ON adherent.id_adherent = cotisation_deces.adherent JOIN commune ON adherent.commune = commune.ID_COMMUNE WHERE cotisation_deces.deces = ? AND commune = ?");
+                    $inf->execute([$_POST['deces'], $_SESSION['user_commune']]);
+                }
                 $result = $inf->fetchAll(PDO::FETCH_ASSOC);
                 echo json_encode($result);
                 break;
@@ -43,12 +53,21 @@ if (isset($_POST)) {
         }
     } else if (isset($_POST['ajouter_cotisation_mensuelle'])) {
         include('connexion.php');
-        $inf = $pdo->prepare("INSERT INTO cotisation_mensuelle(MOIS_COTISATION, MONTANT_COTISATION, ANNEE_COTISATION, adherent) VALUES (?,?,?,?,?)");
+        $inf = $pdo->prepare("INSERT INTO cotisation_mensuelle(MOIS_COTISATION, MONTANT_COTISATION, ANNEE_COTISATION, adherent) VALUES (?,?,?,?)");
         $exec = $inf->execute(
-            [$_POST['mois'], $_POST['montant'], date('Y'), $_POST['deces_conc'], $_POST['adherent']]
+            [$_POST['mois'], $_POST['montant'], date('Y'), $_POST['adherent']]
         );
         if ($exec) {
             echo "<script>alert('Cotisation enregistrée');location.href =\"index.php?id=liste_adherent.php\"</script>";
+        }
+    } else if (isset($_POST['ajouter_commune'])) {
+        include('connexion.php');
+        $inf = $pdo->prepare("INSERT INTO commune(NOM_COMMUNE) VALUES (?)");
+        $exec = $inf->execute(
+            [strtoupper($_POST['n_commune'])]
+        );
+        if ($exec) {
+            echo "<script>alert('Commune enregistrée');location.href =\"index.php?id=adherent.php\"</script>";
         }
     }
 }

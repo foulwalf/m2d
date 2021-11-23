@@ -2,6 +2,17 @@
 include('connexion.php');
 $inf = $pdo->query("SELECT * FROM deces JOIN adherent ON id_adherent = deces.adherent ");
 $results = $inf->fetchAll();
+if (isset($_POST['vbtn'])) {
+  include('connexion.php');
+  if ($_SESSION['role'] == 'admin') {
+    $inf = $pdo->prepare("SELECT * FROM adherent JOIN cotisation_deces ON adherent.id_adherent = cotisation_deces.adherent JOIN commune ON adherent.commune = commune.ID_COMMUNE WHERE cotisation_deces.deces = ?");
+    $inf->execute([$_POST['deces']]);
+  } else {
+    $inf = $pdo->prepare("SELECT * FROM adherent JOIN cotisation_deces ON adherent.id_adherent = cotisation_deces.adherent JOIN commune ON adherent.commune = commune.ID_COMMUNE WHERE cotisation_deces.deces = ? AND commune = ?");
+    $inf->execute([$_POST['deces'], $_SESSION['user_commune']]);
+  }
+  $result = $inf->fetchAll(PDO::FETCH_ASSOC);
+}
 ?>
 <!DOCTYPE html>
 <html lang="fr">
@@ -42,58 +53,67 @@ $results = $inf->fetchAll();
             <div class="row">
               <div class="col-12">
                 <div class="row">
-                  <div class="row">
-                    <div class="col-4">
-                      <div>
-                        <select class="form-select" id="deces" aria-label="Floating label select example">
-                          <option selected value="">...</option>
-                          <?php foreach ($results as $deces) { ?>
-                            <option value="<?= $deces['ID_DECES'] ?>"><?= $deces['nom_adherent']." ".$deces['prenom_adherent']?></option>
-                          <?php } ?>
-                        </select>
-                        <label for="floatingSelect">Décès<span style="color:red">*</span></label>
+                  <form action="" method="POST">
+                    <div class="row">
+                      <div class="col-4">
+                        <div>
+                          <input type="hidden" name="method" value="getCotisationDeces">
+                          <select class="form-select" id="deces" aria-label="Floating label select example" name="deces">
+                            <option selected value="">...</option>
+                            <?php foreach ($results as $deces) { ?>
+                              <option value="<?= $deces['ID_DECES'] ?>"><?= $deces['nom_adherent'] . " " . $deces['prenom_adherent'] ?></option>
+                            <?php } ?>
+                          </select>
+                          <label for="floatingSelect">Décès<span style="color:red">*</span></label>
+                        </div>
+                      </div>
+                      <div class="col-4">
+                        <button class="btn btn-primary disabled" id="vbtn" type="submit" name="vbtn">Valider</button>
                       </div>
                     </div>
-                    <div class="col">
-                      <button class="btn btn-primary disabled" id="vbtn">Valider</button>
-                      <button class="btn btn-primary disabled" id="btn">Impriper</button>
-                    </div>
-                  </div>
+                  </form>
                 </div>
-                <div class="table-responsive mt-3">
-                  <table class="table">
-                    <thead>
-                      <tr>
-                        <th>N°</th>
-                        <th>Nom et Prénom</th>
-                        <th>Contact</th>
-                        <th>Email</th>
-                        <th>Commune</th>
-                        <th>Montant</th>
-                      </tr>
-                    </thead>
-                    <tbody id="table_body">
-                      <tr>
-                        <td>1</td>
-                        <td>2012/08/03</td>
-                        <td>Edinburgh</td>
-                        <td>New York</td>
-                        <td>$1500</td>
-                        <td>$3200</td>
-                      </tr>
-                    </tbody>
-                  </table>
-                </div>
+              </div>
+              <div class="table-responsive mt-3">
+                <table class="table">
+                  <thead>
+                    <tr>
+                      <th>N°</th>
+                      <th>Nom et Prénom</th>
+                      <th>Contact</th>
+                      <th>Sexe</th>
+                      <th>Email</th>
+                      <th>Commune</th>
+                      <th>Montant</th>
+                    </tr>
+                  </thead>
+                  <tbody id="table_body">
+                    <?php if (isset($result)) { $i = 1;
+                      foreach ($result as $cotisation) { ?>
+                        <tr>
+                          <td><?php echo $i; $i++ ?></td>
+                          <td><?= $cotisation['nom_adherent'] . " " . $cotisation['prenom_adherent'] ?></td>
+                          <td><?= $cotisation['contact_adherent'] ?></td>
+                          <td><?= $cotisation['sexe_adherent'] ?></td>
+                          <td><?= $cotisation['email_adherent'] ?></td>
+                          <td><?= $cotisation['NOM_COMMUNE'] ?></td>
+                          <td><?= $cotisation['MONTANT_COTISATION'] ?></td>
+                        </tr>
+                      <?php }
+                    } ?>
+                  </tbody>
+                </table>
               </div>
             </div>
           </div>
         </div>
       </div>
-      <!-- content-wrapper ends -->
-
-      <!-- partial -->
     </div>
-    <!-- main-panel ends -->
+    <!-- content-wrapper ends -->
+
+    <!-- partial -->
+  </div>
+  <!-- main-panel ends -->
   </div>
   <!-- page-body-wrapper ends -->
   </div>
@@ -126,29 +146,31 @@ $results = $inf->fetchAll();
       deces_id = deces.value
       ennabledButton()
     })
-    vbtn.addEventListener('click', function() {
-      const data = {
-        'method': 'getCotisationDeces',
-        'deces': deces_id
-      }
-      fetch('function.php', {
-          method: 'POST',
-          mode: 'cors',
-          body: JSON.stringify(data),
-          headers: {
-            'Content-Type': 'application/json',
-          },
-        })
-        .then(response => {
-          console.log(response)
-        })
-        .then(result => {
-          fillTable(result)
-        })
-        .catch(error => {
-          console.error('Error', error)
-        })
-    })
+    // vbtn.addEventListener('click', function() {
+    //   const data = {
+    //     'method': 'getCotisationDeces',
+    //     'deces': deces_id
+    //   }
+    //   fetch('function.php', {
+    //       method: 'POST',
+    //       mode: 'cors',
+    //       body: JSON.stringify(data),
+    //       headers: {
+    //         'Content-Type': 'application/json',
+    //         'Accept': 'text/html'
+    //       },
+    //     })
+    //     .then(response => {
+    //       return JSON.parse(response.json())
+    //     })
+    //     .then(result => {
+    //       console.log(result);
+    //       fillTable(result)
+    //     })
+    //     .catch(error => {
+    //       console.log(error)
+    //     })
+    // })
 
     function ennabledButton() {
       if (deces.value !== null && deces.value !== '') {
@@ -158,34 +180,35 @@ $results = $inf->fetchAll();
       }
     }
 
-    function fillTable(param) {
-      var content = "";
-      var i = 1;
-      if (param == null) {
-        content += `
-          <tr>
-            <td colspan="6" align="center"><b>AUNCUNE INFORMATION TROUV&Eacute;E POUR CE D&Eacute;C&Egrave;S</b></td>
-          </tr>`;
-      } else {
-        for (obj in param) {
-          content += `
-          <tr>
-          <td>${i}</td>
-          <td>${obj.nom_adherent} ${obj.prenom_adherent}</td>
-          <td>${obj.contact_adherent}</td>
-          <td>${obj.email_adherent}</td>
-          <td>${obj.commune}</td>
-          <td>${obj.MONTANT_COTISATION}</td>
-          </tr>`;
-          i++;
-        }
-      }
+    // function fillTable(param) {
+    //   var content = "";
+    //   var i = 1;
+    //   if (param == null) {
+    //     content += `
+    //       <tr>
+    //         <td colspan="6" align="center"><b>AUNCUNE INFORMATION TROUV&Eacute;E POUR CE D&Eacute;C&Egrave;S</b></td>
+    //       </tr>`;
+    //   } else {
+    //     for (obj in param) {
+    //       content += `
+    //       <tr>
+    //       <td>${i}</td>
+    //       <td>${obj.nom_adherent} ${obj.prenom_adherent}</td>
+    //       <td>${obj.sexe_adherent}</td>
+    //       <td>${obj.contact_adherent}</td>
+    //       <td>${obj.email_adherent}</td>
+    //       <td>${obj.commune}</td>
+    //       <td>${obj.MONTANT_COTISATION}</td>
+    //       </tr>`;
+    //       i++;
+    //     }
+    //   }
 
-      while (tbody.firstChild) {
-        tbody.removeChild(tbody.firstChild);
-      }
-      tbody.innerHTML = content
-    }
+    //   while (tbody.firstChild) {
+    //     tbody.removeChild(tbody.firstChild);
+    //   }
+    //   tbody.innerHTML = content
+    // }
   </script>
 </body>
 <!-- Mirrored from www.bootstrapdash.com/demo/skydash/template/demo/horizontal-default-light/pages/tables/data-table.html by HTTrack Website Copier/3.x [XR&CO'2014], Tue, 31 Aug 2021 13:11:32 GMT -->

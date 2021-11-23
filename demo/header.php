@@ -1,3 +1,4 @@
+
 <div class="horizontal-menu">
       <nav class="navbar top-navbar col-lg-12 col-12 p-0">
         <div class="container">
@@ -8,14 +9,14 @@
               <li class="nav-item nav-profile dropdown">
                 <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown" id="profileDropdown">
                   <img src="../images/icons8-user-64.png" alt="profile"/>
-                  <span>username</span>
+                  <span><?=$_SESSION['IDENTITE_USER']?></span>
                 </a>
-                <div class="dropdown-menu dropdown-menu-right navbar-dropdown" aria-labelledby="profileDropdown">
-                  <a class="dropdown-item">
+                <div class="dropdown-menu dropdown-menu-right navbar-dropdown" aria-labelledby="profileDropdown" style="top: 50px!important;">
+                  <a class="dropdown-item" href="index.php?id=param.php">
                     <i class="ti-settings text-primary"></i>
                     Parametres
                   </a>
-                  <a class="dropdown-item">
+                  <a class="dropdown-item" href="logout.php">
                     <i class="ti-power-off text-primary"></i>
                     Deconexion
                   </a>
@@ -46,9 +47,7 @@
               <div class="submenu">
                 <ul class="submenu-item">
                   <li class="nav-item"><a class="nav-link" href="index.php?id=adherent.php">Nouvel Adherent</a></li>
-                  <li class="nav-item"><a class="nav-link" href="index.php?id=liste_adherent.php">Listes</a></li>
-                  <li class="nav-item"><a class="nav-link" href="index.php?id=deces.php">Déces</a></li>
-                   
+                  <li class="nav-item"><a class="nav-link" href="index.php?id=liste_adherent.php">Listes</a></li>                   
                 </ul>
               </div>
             </li>
@@ -72,12 +71,25 @@
                 <i class="menu-arrow"></i></a>
               <div class="submenu">
                 <ul class="submenu-item">
-                  <li class="nav-item"><a class="nav-link" href="../forms/basic_elements.html">Mensuel</a></li>
-                  <li class="nav-item"><a class="nav-link" href="../forms/advanced_elements.html">De Décès</a></li>
-                   
+                  <li class="nav-item"><a class="nav-link" href="index.php?id=etat_cotisations_mensuelles.php">Mensuel</a></li>
+                  <li class="nav-item"><a class="nav-link" href="index.php?id=etat_cotisations_décès.php">De Décès</a></li>
                 </ul>
               </div>
             </li>
+            <?php if($_SESSION['role'] == 'admin' ) {?>
+            <li class="nav-item">
+              <a href="#" class="nav-link">
+                <i class="icon-columns menu-icon"></i>
+                <span class="menu-title">Utilisateurs</span>
+                <i class="menu-arrow"></i></a>
+              <div class="submenu">
+                <ul class="submenu-item">
+                  <li class="nav-item"><a class="nav-link" href="index.php?id=user.php">Nouvel utilisateur</a></li>
+                  <li class="nav-item"><a class="nav-link" href="index.php?id=liste_utilisateur.php">Listes</a></li>                   
+                </ul>
+              </div>
+            </li>
+            <?php } ?>
           </ul>
         </div>
       </nav>

@@ -1,8 +1,17 @@
+<?php
+session_start();
+
+if (!isset($_SESSION['LOGIN_USER'])) {
+  echo "<script>alert('Veuillez vous connecter s\'il vous plait'); location.href=\"../index.php\"</script>";
+}
+?>
+
 <!DOCTYPE html>
 <html lang="en">
 
 
 <!-- Mirrored from www.bootstrapdash.com/demo/skydash/template/demo/horizontal-default-light/index.html by HTTrack Website Copier/3.x [XR&CO'2014], Tue, 31 Aug 2021 13:10:23 GMT -->
+
 <head>
   <!-- Required meta tags -->
   <meta charset="utf-8">
@@ -22,6 +31,11 @@
   <link rel="stylesheet" href="../css/horizontal-layout-light/style.css">
   <!-- endinject -->
   <link rel="shortcut icon" href="../images/favicon.png" />
+  <style>
+    .nav-item:hover>.dropdown-menu{
+      display: block;
+    }
+  </style>
 </head>
 
 <body>
@@ -31,32 +45,32 @@
     <!-- FIN DE L'ENTETE ---->
 
     <!-- partial -->
-     
-            
-           
-          <?php 
-
-          if(!empty($_GET['id']))
-          include($_GET['id']);
-           else
-            include("tableau.php");
-          ?>
 
 
 
+    <?php
 
-        </div>
-         
-         <?php include("footer.php"); ?>
-      </div>
-      <!-- main-panel ends -->
-    </div>
-    <!-- page-body-wrapper ends -->
+    if (!empty($_GET['id']))
+      include($_GET['id']);
+    else
+      include("tableau.php");
+    ?>
+
+
+
+
+  </div>
+
+  <?php include("footer.php"); ?>
+  </div>
+  <!-- main-panel ends -->
+  </div>
+  <!-- page-body-wrapper ends -->
   </div>
   <!-- container-scroller -->
 
-  
+
 </body>
 
- 
+
 </html>

@@ -17,6 +17,17 @@ $month_array = [
   12 => "Décembre"
 ];
 $month_array_keys = array_keys($month_array);
+if (isset($_POST['vbtn'])) {
+  include('connexion.php');
+  if ($_SESSION['role'] == 'admin') {
+    $inf = $pdo->prepare("SELECT * FROM adherent JOIN cotisation_mensuelle ON adherent.id_adherent = cotisation_mensuelle.adherent JOIN commune ON adherent.commune = commune.ID_COMMUNE WHERE MOIS_COTISATION = ? AND ANNEE_COTISATION = ?");
+    $inf->execute([$_POST['mois'], $_POST['annee']]);
+  } else {
+    $inf = $pdo->prepare("SELECT * FROM adherent JOIN cotisation_mensuelle ON adherent.id_adherent = cotisation_mensuelle.adherent JOIN commune ON adherent.commune = commune.ID_COMMUNE WHERE MOIS_COTISATION = ? AND ANNEE_COTISATION = ? AND adherent.commune = ?");
+    $inf->execute([$_POST['mois'], $_POST['annee'], $_SESSION['user_commune']]);
+  }
+  $result = $inf->fetchAll(PDO::FETCH_ASSOC);
+}
 ?>
 <!DOCTYPE html>
 <html lang="fr">
@@ -57,50 +68,73 @@ $month_array_keys = array_keys($month_array);
             <div class="row">
               <div class="col-12">
                 <div class="row">
-                  <div class="row">
-                    <div class="col-4">
-                      <div>
-                        <select class="form-select" id="mois" aria-label="Floating label select example">
-                          <option selected value="">...</option>
-                          <?php foreach ($month_array_keys as $key) { ?>
-                            <option value="<?= $key ?>"><?= $month_array[$key] ?></option>
-                          <?php } ?>
-                        </select>
-                        <label for="floatingSelect">Mois<span style="color:red">*</span></label>
+                  <form action="" method="POST">
+                    <div class="row">
+                      <div class="col-4">
+                        <div>
+                          <select class="form-select" id="mois" aria-label="Floating label select example" name="mois" required>
+                            <option selected value="">...</option>
+                            <?php foreach ($month_array_keys as $key) { ?>
+                              <option value="<?= $key ?>"><?= $month_array[$key] ?></option>
+                            <?php } ?>
+                          </select>
+                          <label for="floatingSelect">Mois<span style="color:red">*</span></label>
+                        </div>
+                      </div>
+                      <div class="col-4">
+                        <div class="">
+                          <select class="form-select" id="annee" aria-label="Floating label select example" name="annee" required>
+                            <option selected value="">...</option>
+                            <?php for ($i = 2021; $i <= $year; $i++) { ?>
+                              <option value="<?= $i ?>"><?= $i ?></option>
+                            <?php } ?>
+                          </select>
+                          <label for="floatingSelect">Année<span style="color:red">*</span></label>
+                        </div>
+                      </div>
+                      <div class="col">
+                        <button class="btn btn-primary disabled" id="vbtn" name="vbtn">Valider</button>
                       </div>
                     </div>
-                    <div class="col-4">
-                      <div class="">
-                        <select class="form-select" id="annee" aria-label="Floating label select example">
-                          <option selected value="">...</option>
-                          <?php for ($i = 2021; $i <= $year; $i++) { ?>
-                            <option value="<?= $i ?>"><?= $i ?></option>
-                          <?php } ?>
-                        </select>
-                        <label for="floatingSelect">Année<span style="color:red">*</span></label>
-                      </div>
-                    </div>
-                    <div class="col">
-                      <button class="btn btn-primary disabled" id="vbtn">Valider</button>
-                      <button class="btn btn-primary disabled" id="ibtn">Imprimer</button>
-                    </div>
-                  </div>
+                  </form>
                 </div>
                 <div class="table-responsive mt-3">
-                  <table class="table">
-                    <thead>
-                      <tr>
-                        <th>N°</th>
-                        <th>Nom et Prénom</th>
-                        <th>Contact</th>
-                        <th>Email</th>
-                        <th>Commune</th>
-                        <th>Montant</th>
-                      </tr>
-                    </thead>
-                    <tbody id="table_body">
-                    </tbody>
-                  </table>
+                  <?php if (isset($_POST)) { ?>
+                    <table class="table">
+                      <thead>
+                        <tr>
+                          <th>N°</th>
+                          <th>Nom et Prénom</th>
+                          <th>Sexe</th>
+                          <th>Contact</th>
+                          <th>Email</th>
+                          <th>Commune</th>
+                          <th>Montant</th>
+                        </tr>
+                      </thead>
+                      <tbody id="table_body">
+                        <?php if (isset($result) && $result != array()) {
+                          $i = 1;
+                          foreach ($result as $cotisation) { ?>
+                            <tr>
+                              <td><?php echo $i;
+                                  $i++ ?></td>
+                              <td><?= $cotisation['nom_adherent'] . " " . $cotisation['prenom_adherent'] ?></td>
+                              <td><?= $cotisation['contact_adherent'] ?></td>
+                              <td><?= $cotisation['sexe_adherent'] ?></td>
+                              <td><?= $cotisation['email_adherent'] ?></td>
+                              <td><?= $cotisation['NOM_COMMUNE'] ?></td>
+                              <td><?= $cotisation['MONTANT_COTISATION'] ?></td>
+                            </tr>
+                          <?php }
+                        } else if(!isset($result) || $result == array()) { ?>
+                          <tr colspan="7">
+                            Aucune informations disponible pour cette période
+                          </tr>
+                        <?php } ?>
+                      </tbody>
+                    </table>
+                  <?php } ?>
                 </div>
               </div>
             </div>
@@ -168,13 +202,13 @@ $month_array_keys = array_keys($month_array);
           },
         })
         .then(response => {
-          console.log(response)
+          return response.json()
         })
         .then(result => {
           fillTable(result)
         })
         .catch(error => {
-          console.error('Error', error)
+          console.error(error)
         })
     })
 
@@ -200,6 +234,7 @@ $month_array_keys = array_keys($month_array);
           <tr>
           <td>${i}</td>
           <td>${obj.nom_adherent} ${obj.prenom_adherent}</td>
+          <td>${obj.sexe_adherent}</td>
           <td>${obj.contact_adherent}</td>
           <td>${obj.email_adherent}</td>
           <td>${obj.commune}</td>

@@ -1,20 +1,11 @@
-<script>
-    function myFunction() {
-        alert("Nouvel adherent correctement enreguistré");
-        
-    }
-</script>
-
 <?php
 include('connexion.php');
-if(isset($_POST['ok'])){
-$inf=$pdo->query("insert into adherent(nom_adherent,prenom_adherent,contact_adherent,email_adherent,sexe_adherent,commune,entreprise_adherent) values('$_POST[nom]','$_POST[prenom]','$_POST[contact]','$_POST[email]','$_POST[sexe]','$_POST[quartier]','$_POST[entreprise]')");
-if($inf)
-echo '<script type=text/javascript> myFunction()</script>';
+$communes = $pdo->query("SELECT * FROM commune");
 
-
-
-
+if (isset($_POST['ok'])) {
+  $inf = $pdo->query("insert into adherent(nom_adherent,prenom_adherent,contact_adherent,email_adherent,sexe_adherent,commune,entreprise_adherent) values('$_POST[nom]','$_POST[prenom]','$_POST[contact]','$_POST[email]','$_POST[sexe]','$_POST[quartier]','$_POST[entreprise]')");
+  if ($inf)
+    echo '<script type=text/javascript> myFunction()</script>';
 }
 ?>
 
@@ -24,6 +15,7 @@ echo '<script type=text/javascript> myFunction()</script>';
 
 
 <!-- Mirrored from www.bootstrapdash.com/demo/skydash/template/demo/horizontal-default-light/pages/forms/basic_elements.html by HTTrack Website Copier/3.x [XR&CO'2014], Tue, 31 Aug 2021 13:11:06 GMT -->
+
 <head>
   <!-- Required meta tags -->
   <meta charset="utf-8">
@@ -45,23 +37,47 @@ echo '<script type=text/javascript> myFunction()</script>';
 </head>
 
 <body>
+  <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="exampleModalLabel">Ajouter une nouvelle commune</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <form method="POST" action="function.php">
+          <div class="modal-body">
+            <div class="mb-3">
+              <label for="recipient-name" class="col-form-label">Commune</label>
+              <input type="text" class="form-control" id="recipient-name" name="n_commune" required>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
+            <button type="submit" class="btn btn-primary" name="ajouter_commune">Ajouter</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
   <div class="container-scroller">
-      <!-- partial -->
+    <!-- partial -->
     <div class="container-fluid page-body-wrapper">
       <div class="main-panel">
         <div class="content-wrapper">
           <div class="row">
-             <div class="col-12 grid-margin">
+            <div class="col-12 grid-margin">
               <div class="card">
                 <div class="card-body">
-                  <h4 class="card-title"><center>IDENTIFICATION DE L'ADHERENT</h4>
+                  <h4 class="card-title">
+                    <center>IDENTIFICATION DE L'ADHERENT
+                  </h4>
                   <form class="form-sample" method="post" action="">
                     <div class="row">
                       <div class="col-md-6">
                         <div class="form-group row">
                           <label class="col-sm-3 col-form-label"><strong>NOM</strong></label>
                           <div class="col-sm-9">
-                            <input type="text" class="form-control" name="nom" placeholder="nom adherent" name="nom"/>
+                            <input type="text" class="form-control" name="nom" placeholder="nom adherent" name="nom" required />
                           </div>
                         </div>
                       </div>
@@ -69,7 +85,7 @@ echo '<script type=text/javascript> myFunction()</script>';
                         <div class="form-group row">
                           <label class="col-sm-3 col-form-label"><strong>PRENOM</strong></label>
                           <div class="col-sm-9">
-                            <input type="text" class="form-control" name="prenom" placeholder="prénom adherent"/>
+                            <input type="text" class="form-control" name="prenom" placeholder="prénom adherent" required />
                           </div>
                         </div>
                       </div>
@@ -79,7 +95,7 @@ echo '<script type=text/javascript> myFunction()</script>';
                         <div class="form-group row">
                           <label class="col-sm-3 col-form-label"><strong>CONTACT</strong></label>
                           <div class="col-sm-9">
-                            <input type="text" class="form-control" name="contact" placeholder="contact adherent"/>
+                            <input type="text" class="form-control" name="contact" placeholder="contact adherent" required />
                           </div>
                         </div>
                       </div>
@@ -87,42 +103,48 @@ echo '<script type=text/javascript> myFunction()</script>';
                         <div class="form-group row">
                           <label class="col-sm-3 col-form-label"><strong>EMAIL</strong></label>
                           <div class="col-sm-9">
-                            <input type="text" class="form-control" placeholder="email adherent" name="email"/>
+                            <input type="text" class="form-control" placeholder="email adherent" name="email" required />
                           </div>
                         </div>
                       </div>
                     </div>
-                     <div class="row">
+                    <div class="row">
                       <div class="col-md-6">
                         <div class="form-group row">
-                           
+
                           <div class="form-group row">
-                          <label class="col-sm-3 col-form-label"><strong>QUARTIER</strong></label>
-                          <div class="col-sm-9">
-                            <input type="text" class="form-control" placeholder="quartier de l'adherent" name="quartier"/>
+                            <label class="col-sm-3 col-form-label"><strong>COMMUNE</strong></label>
+                            <div class="input-group col-sm-9 w-75">
+                              <select name="quartier" id="" class="form-select" required>
+                                <option value="">...</option>
+                                <?php while ($commune = $communes->fetch()) { ?>
+                                  <option value="<?= $commune['ID_COMMUNE'] ?>"><?= $commune['NOM_COMMUNE'] ?></option>
+                                <?php } ?>
+                              </select>
+                              <button class="btn btn-primary col-1 d-flex justify-content-center align-items-center" type="button" id="button-addon2" data-bs-toggle="modal" data-bs-target="#exampleModal" data-bs-whatever="@mdo">+</button>
+                            </div>
                           </div>
-                        </div>
-                          
+
                         </div>
                       </div>
                       <div class="col-md-6">
                         <div class="form-group row">
                           <label class="col-sm-3 col-form-label"><strong>ENTREPRISE</strong></label>
                           <div class="col-sm-9">
-                            <input type="text" class="form-control" name="entreprise" placeholder="entreprise  adherent"/>
+                            <input type="text" class="form-control" name="entreprise" placeholder="entreprise  adherent" required />
                           </div>
                         </div>
                       </div>
                     </div>
                     <div class="row">
-                      
+
                       <div class="col-md-6">
                         <div class="form-group row">
                           <label class="col-sm-3 col-form-label"><strong>SEXE</strong></label>
                           <div class="col-sm-4">
                             <div class="form-check">
                               <label class="form-check-label">
-                                <input type="radio" class="form-check-input" name="sexe" id="membershipRadios1" value="M" checked>
+                                <input type="radio" class="form-check-input" name="sexe" id="membershipRadios1" value="M" required>
                                 Masculin
                               </label>
                             </div>
@@ -130,37 +152,31 @@ echo '<script type=text/javascript> myFunction()</script>';
                           <div class="col-sm-5">
                             <div class="form-check">
                               <label class="form-check-label">
-                                <input type="radio" class="form-check-input" name="sexe" id="membershipRadios2" value="F">
+                                <input type="radio" class="form-check-input" name="sexe" id="membershipRadios2" value="F" required>
                                 Feminin
                               </label>
                             </div>
                           </div>
                         </div>
-                         
-                            
-                        </div>
-
-                      </div>
-                      <div class="col-md-6">
-                        <button type="submit" name="ok" class="btn btn-primary me-2">Enregistrer</button>
                       </div>
                     </div>
-                  
-                                      
-                    
-                  </form>
+                    <div class="col-md-6">
+                      <button type="submit" name="ok" class="btn btn-primary me-2">Enregistrer</button>
+                    </div>
                 </div>
+                </form>
               </div>
             </div>
-                      
           </div>
+
         </div>
-        
-        <!-- partial -->
       </div>
-      <!-- main-panel ends -->
+
+      <!-- partial -->
     </div>
-    <!-- page-body-wrapper ends -->
+    <!-- main-panel ends -->
+  </div>
+  <!-- page-body-wrapper ends -->
   </div>
   <!-- container-scroller -->
   <!-- plugins:js -->
@@ -186,4 +202,5 @@ echo '<script type=text/javascript> myFunction()</script>';
 
 
 <!-- Mirrored from www.bootstrapdash.com/demo/skydash/template/demo/horizontal-default-light/pages/forms/basic_elements.html by HTTrack Website Copier/3.x [XR&CO'2014], Tue, 31 Aug 2021 13:11:08 GMT -->
+
 </html>
