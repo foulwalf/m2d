@@ -1,7 +1,5 @@
 <?php
 include('connexion.php');
-$communes = $pdo->query("SELECT * FROM commune");
-
 if (isset($_POST['ok'])) {
   $inf = $pdo->query("insert into adherent(nom_adherent,prenom_adherent,contact_adherent,email_adherent,sexe_adherent,commune,entreprise_adherent) values('$_POST[nom]','$_POST[prenom]','$_POST[contact]','$_POST[email]','$_POST[sexe]','$_POST[quartier]','$_POST[entreprise]')");
   if ($inf)
@@ -36,7 +34,7 @@ if (isset($_POST['ok'])) {
   <link rel="shortcut icon" href="../../images/favicon.png" />
 </head>
 
-<body>
+<body onload="getCommunes();">
   <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
     <div class="modal-dialog">
       <div class="modal-content">
@@ -44,18 +42,16 @@ if (isset($_POST['ok'])) {
           <h5 class="modal-title" id="exampleModalLabel">Ajouter une nouvelle commune</h5>
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
-        <form method="POST" action="function.php">
-          <div class="modal-body">
-            <div class="mb-3">
-              <label for="recipient-name" class="col-form-label">Commune</label>
-              <input type="text" class="form-control" id="recipient-name" name="n_commune" required>
-            </div>
+        <div class="modal-body">
+          <div class="mb-3">
+            <label for="recipient-name" class="col-form-label">Commune</label>
+            <input type="text" class="form-control" id="input_commune" name="n_commune" required>
           </div>
-          <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
-            <button type="submit" class="btn btn-primary" name="ajouter_commune">Ajouter</button>
-          </div>
-        </form>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
+          <button type="submit" class="btn btn-primary" name="ajouter_commune" id="ajouter_commune" disabled>Ajouter</button>
+        </div>
       </div>
     </div>
   </div>
@@ -115,11 +111,8 @@ if (isset($_POST['ok'])) {
                           <div class="form-group row">
                             <label class="col-sm-3 col-form-label"><strong>COMMUNE</strong></label>
                             <div class="input-group col-sm-9 w-75">
-                              <select name="quartier" id="" class="form-select" required>
+                              <select name="quartier" id="commune" class="form-select" required>
                                 <option value="">...</option>
-                                <?php while ($commune = $communes->fetch()) { ?>
-                                  <option value="<?= $commune['ID_COMMUNE'] ?>"><?= $commune['NOM_COMMUNE'] ?></option>
-                                <?php } ?>
                               </select>
                               <button class="btn btn-primary col-1 d-flex justify-content-center align-items-center" type="button" id="button-addon2" data-bs-toggle="modal" data-bs-target="#exampleModal" data-bs-whatever="@mdo">+</button>
                             </div>
@@ -197,7 +190,86 @@ if (isset($_POST['ok'])) {
   <script src="../../../js/file-upload.js"></script>
   <script src="../../../js/typeahead.js"></script>
   <script src="../../../js/select2.js"></script>
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
   <!-- End custom js for this page-->
+  <script>
+    var btn = document.getElementById('ajouter_commune');
+    var input = document.getElementById('input_commune');
+    var modal = new bootstrap.Modal(document.getElementById('exampleModal'), {
+      keyboard: false
+    })
+    input.addEventListener('change', function name(params) {
+      if (this.value != '') {
+        btn.disabled = false;
+      } else {
+        btn.disabled = true;
+      }
+    })
+    btn.addEventListener('click', function() {
+      ajouter_commune()
+    });
+
+    function ajouter_commune() {
+      var nom = input.value;
+      console.log(nom);
+      const data = {
+        'method': 'addCommune',
+        'value': nom
+      }
+      $.ajax({
+        url: 'function.php',
+        type: 'POST',
+        crossDomain: true,
+        data: data,
+        dataType: 'json',
+        success: function(response) {
+          //console.log(response);
+          if (response) {
+            getCommunes();
+            input.value = '';
+            modal.hide();
+            alert("Commune ajoutée")
+          }
+        },
+        error: function(error) {
+          console.log(error);
+        }
+      });
+    }
+
+    function getCommunes() {
+      const data = {
+        'method': 'getCommunes',
+      }
+      $.ajax({
+        url: 'function.php',
+        type: 'POST',
+        crossDomain: true,
+        data: data,
+        dataType: 'json',
+        success: function(response) {
+          console.log(response);
+          if (response) {
+            var select = document.getElementById('commune');
+            select.innerHTML = '';
+            var option = document.createElement('option');
+            option.value = '';
+            option.innerHTML = '...';
+            select.appendChild(option);
+            response.forEach(commune => {
+              var option = document.createElement('option');
+              option.value = commune.ID_COMMUNE;
+              option.innerHTML = commune.NOM_COMMUNE;
+              select.appendChild(option);
+            });
+          }
+        },
+        error: function(error) {
+          console.log(error);
+        }
+      });
+    }
+  </script>
 </body>
 
 

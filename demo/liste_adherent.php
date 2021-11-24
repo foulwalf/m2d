@@ -166,10 +166,10 @@ $data = $req->fetchAll();
             <div class="row">
               <div class="col-12">
                 <div class="table-responsive">
-                  <table id="order-listing" class="table">
+                  <table class="table">
                     <thead>
                       <tr>
-                        <th>Order #</th>
+                        <th>#</th>
                         <th>Nom et Prénom</th>
                         <th>Contact</th>
                         <th>Email</th>

@@ -45,20 +45,12 @@ if (!isset($_SESSION['LOGIN_USER'])) {
     <!-- FIN DE L'ENTETE ---->
 
     <!-- partial -->
-
-
-
     <?php
-
     if (!empty($_GET['id']))
       include($_GET['id']);
     else
       include("tableau.php");
     ?>
-
-
-
-
   </div>
 
   <?php include("footer.php"); ?>

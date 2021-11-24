@@ -26,7 +26,6 @@ $data2=$req2->fetch();
 $req3=$pdo->prepare("select SUM(MONTANT_COTISATION) as cota from cotisation_mensuelle where MOIS_COTISATION=? and ANNEE_COTISATION = ?");
 $req3->execute([$month, $year]);
 $data3=$req3->fetch();
-var_dump($data3);
 ?>
 <!DOCTYPE html>
 <html lang="en">

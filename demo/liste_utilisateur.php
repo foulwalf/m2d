@@ -47,7 +47,7 @@ $data = $req->fetchAll();
                         <div class="row">
                             <div class="col-12">
                                 <div class="table-responsive">
-                                    <table id="order-listing" class="table">
+                                    <table class="table">
                                         <thead>
                                             <tr>
                                                 <th>#</th>

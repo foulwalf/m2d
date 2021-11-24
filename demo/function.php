@@ -38,6 +38,22 @@ if (isset($_POST)) {
                 $result = $inf->fetchAll(PDO::FETCH_ASSOC);
                 echo json_encode($result);
                 break;
+            case 'addCommune':
+                include('connexion.php');
+                $inf = $pdo->prepare("INSERT INTO commune(NOM_COMMUNE) VALUES (?)");
+                $exec = $inf->execute(
+                    [strtoupper($_POST['value'])]
+                );
+                if ($exec) {
+                    echo json_encode("true");
+                }
+                break;
+            case 'getCommunes':
+                include('connexion.php');
+                $communes = $pdo->query("SELECT * FROM commune");
+                $result = $communes->fetchAll(PDO::FETCH_ASSOC);
+                echo json_encode($result);
+                break;
             default:
                 # code...
                 break;
@@ -59,15 +75,6 @@ if (isset($_POST)) {
         );
         if ($exec) {
             echo "<script>alert('Cotisation enregistrée');location.href =\"index.php?id=liste_adherent.php\"</script>";
-        }
-    } else if (isset($_POST['ajouter_commune'])) {
-        include('connexion.php');
-        $inf = $pdo->prepare("INSERT INTO commune(NOM_COMMUNE) VALUES (?)");
-        $exec = $inf->execute(
-            [strtoupper($_POST['n_commune'])]
-        );
-        if ($exec) {
-            echo "<script>alert('Commune enregistrée');location.href =\"index.php?id=adherent.php\"</script>";
         }
     }
 }
