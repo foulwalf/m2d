@@ -1,5 +1,5 @@
 <?php
-
+include("connexion.php");
 if (isset($_POST['ok'])) {
     $inf = $pdo->prepare("INSERT INTO utilisateur(IDENTITE_USER, LOGIN_USER, PWD_USER, role, commune) VALUES (?,?,?,?,?)");
     $inf->execute(array($_POST['nom'] . ' ' . $_POST['prenom'], $_POST['email'], '12345', $_POST['role'], $_POST['commune']));

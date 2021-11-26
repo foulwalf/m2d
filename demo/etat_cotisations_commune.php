@@ -4,50 +4,56 @@ $month = $date->format("m");
 $year = $date->format("Y");
 if (isset($_POST['vbtn'])) {
     include('connexion.php');
-    if ($_SESSION['role'] == 'admin') {
-        $inf = $pdo->prepare("SELECT *, SUM(MONTANT_COTISATION) as total, adherent.sexe_adherent as classe FROM  cotisation_mensuelle join adherent on adherent.id_adherent = cotisation_mensuelle.adherent where ANNEE_COTISATION = ? group by MOIS_COTISATION, classe order by MOIS_COTISATION ASC");
-        $inf->execute([$_POST['annee']]);
-    } else {
-        $inf = $pdo->prepare("SELECT *, SUM(MONTANT_COTISATION) as total, adherent.sexe_adherent as classe FROM cotisation_mensuelle JOIN adherent ON adherent.id_adherent = cotisation_mensuelle.adherent JOIN commune ON adherent.commune = commune.ID_COMMUNE WHERE ANNEE_COTISATION = ? AND adherent.commune = ? GROUP BY MOIS_COTISATION order by MOIS_COTISATION ASC");
-        $inf->execute([$_POST['annee'], $_SESSION['commune']]);
-    }
-    $results = $inf->fetchAll(PDO::FETCH_ASSOC);
-    $month_array = [
-        1 => "Janvier",
-        2 => "Février",
-        3 => "Mars",
-        4 => "Avril",
-        5 => "Mai",
-        6 => "Juin",
-        7 => "Juillet",
-        8 => "Août",
-        9 => "Septembre",
-        10 => "Octobre",
-        11 => "Novembre",
-        12 => "Décembre"
-    ];
-    $cotisation = [];
-    for ($i = 0; $i < sizeof($results); $i++) {
-        $temp_array = [];
-        $temp_array['mois'] = $month_array[$results[$i]['MOIS_COTISATION']];
-        $temp_array['annee'] = $results[$i]['ANNEE_COTISATION'];
-        if ($results[$i]['classe'] == 'F') {
-            $temp_array['femme'] = $results[$i]['total'];
-        } else {
-            $temp_array['homme'] = $results[$i]['total'];
-        }
-        if (!isset($temp_array['femme'])) {
-            $temp_array['femme'] = 0;
-        }
-        if (!isset($temp_array['homme'])) {
-            $temp_array['homme'] = 0;
-        }
-        array_push($cotisation, $temp_array);
-    }
+    $inf1 = $pdo->prepare("SELECT NOM_COMMUNE, SUM(MONTANT_COTISATION) as total_mensuel, adherent.sexe_adherent as classe FROM  cotisation_mensuelle join adherent on adherent.id_adherent = cotisation_mensuelle.adherent join commune on adherent.commune = commune.ID_COMMUNE where ANNEE_COTISATION = ? group by ID_COMMUNE, classe order by NOM_COMMUNE ASC, classe ASC");
+    $inf2 = $pdo->prepare("SELECT NOM_COMMUNE, SUM(MONTANT_COTISATION) as total_deces, adherent.sexe_adherent as classe FROM  cotisation_deces join adherent on adherent.id_adherent = cotisation_deces.adherent join commune on adherent.commune = commune.ID_COMMUNE where YEAR(DATE_COTISATION) = ? group by ID_COMMUNE, classe order by NOM_COMMUNE ASC");
+    $inf1->execute([$_POST['annee']]);
+    $inf2->execute([$_POST['annee']]);
+
+    $results1 = $inf1->fetchAll(PDO::FETCH_ASSOC);
+    $results2 = $inf2->fetchAll(PDO::FETCH_ASSOC);
     // echo '<pre>';
-    // var_dump($cotisation);
+    // var_dump(sizeof($results1));
+    // var_dump($results2);
     // echo '</pre>';
     // die;
+    $cotisation_menuselle = [];
+    $commune = [];
+    for ($i = 0; $i < sizeof($results1); $i++) {
+        
+        if(!isset($cotisation_menuselle[$results1[$i]['NOM_COMMUNE']])){
+            $cotisation_menuselle[$results1[$i]['NOM_COMMUNE']] = [];
+        }
+        if ($results1[$i]['classe'] == 'M') {
+            $cotisation_menuselle[$results1[$i]['NOM_COMMUNE']]['total_mensuel_homme'] = $results1[$i]['total_mensuel'];
+        } else {
+            $cotisation_menuselle[$results1[$i]['NOM_COMMUNE']]['total_mensuel_femme'] = $results1[$i]['total_mensuel'];
+        } 
+        if(!isset($cotisation_menuselle[$results1[$i]['NOM_COMMUNE']]['total_mensuel_femme'])){
+            $cotisation_menuselle[$results1[$i]['NOM_COMMUNE']]['total_mensuel_femme'] = 0;
+        }
+        if(!isset($cotisation_menuselle[$results1[$i]['NOM_COMMUNE']]['total_mensuel_homme'])){
+            $cotisation_menuselle[$results1[$i]['NOM_COMMUNE']]['total_mensuel_homme'] = 0;
+        }
+        //$temp['total_mensuel_homme'] = $results1[$i]['NOM_COMMUNE'];
+    }
+    $cotisation_deces = [];
+    for ($i = 0; $i < sizeof($results2); $i++) {
+        if(!isset($cotisation_deces[$results2[$i]['NOM_COMMUNE']])){
+            $cotisation_deces[$results2[$i]['NOM_COMMUNE']] = [];
+        }
+        if ($results2[$i]['classe'] == 'M') {
+            $cotisation_deces[$results2[$i]['NOM_COMMUNE']]['total_deces_homme'] = $results2[$i]['total_deces'] === null ? 0 : $results2[$i]['total_deces'];
+        } else {
+            $cotisation_deces[$results2[$i]['NOM_COMMUNE']]['total_deces_femme'] = $results2[$i]['total_deces'] === null ? 0 : $results2[$i]['total_deces'];
+        } 
+        if (!isset($cotisation_deces[$results2[$i]['NOM_COMMUNE']]['total_deces_homme'])){
+            $cotisation_deces[$results2[$i]['NOM_COMMUNE']]['total_deces_homme'] = 0;
+        }
+        if (!isset($cotisation_deces[$results2[$i]['NOM_COMMUNE']]['total_deces_femme'])){
+            $cotisation_deces[$results2[$i]['NOM_COMMUNE']]['total_deces_homme'] = 0;
+        }
+    }
+
 }
 ?>
 <!DOCTYPE html>
@@ -96,9 +102,7 @@ if (isset($_POST['vbtn'])) {
                                                     <select class="form-select" id="annee" aria-label="Floating label select example" required name="annee">
                                                         <option selected value="">...</option>
                                                         <?php for ($i = 2021; $i <= $year; $i++) { ?>
-                                                            <option value="<?= $i ?>" <?php if (isset($_POST['vbtn']) && $_POST['annee'] == $i) {
-                                                                                            echo "selected";
-                                                                                        } ?>><?= $i ?></option>
+                                                            <option value="<?= $i ?>" <?php if(isset($_POST['vbtn']) && $_POST['annee']==$i){echo "selected";}?>><?= $i ?></option>
                                                         <?php } ?>
                                                     </select>
                                                     <label for="floatingSelect">Année<span style="color:red">*</span></label>
@@ -111,44 +115,90 @@ if (isset($_POST['vbtn'])) {
 
                                     </form>
                                 </div>
-                                <?php if (isset($_POST['vbtn']) && $cotisation !== []) { ?>
+                                <?php if (isset($_POST['vbtn']) && $cotisation_deces !== [] && $cotisation_menuselle !== []) { ?>
                                     <div class="table-responsive">
                                         <div class="table-responsive mt-3">
                                             <table class="table">
                                                 <thead>
                                                     <tr>
+                                                        <th></th>
+                                                        <th></th>
+                                                        <th colspan="2">Cotisations mensuelles</th>
+                                                        <th></th>
+                                                    </tr>
+                                                    <tr>
                                                         <th>N°</th>
-                                                        <th>Mois</th>
-                                                        <th>Année</th>
-                                                        <th>Homme</th>
-                                                        <th>Femme</th>
-                                                        <th>Total par mois</th>
+                                                        <th>Commune</th>
+                                                        <th>Hommes</th>
+                                                        <th>Femmes</th>
+                                                        <th>Total</th>
                                                     </tr>
                                                 </thead>
                                                 <tbody id="table_body">
                                                     <?php $i = 1;
-                                                    $total_homme = 0;
-                                                    $total_femme = 0;
+                                                    $total_mensuel_homme = 0;
+                                                    $total_mensuel_femme = 0;
                                                     $total_ann = 0;
-                                                    foreach ($cotisation as $cota) { ?>
+                                                    foreach ($cotisation_menuselle as $key => $value) { $total_partiel = (!isset($value['total_mensuel_homme'])?0:$value['total_mensuel_homme'])+(!isset($value['total_mensuel_femme'])?0:$value['total_mensuel_femme'])?>
                                                         <tr>
                                                             <td><?= $i;
                                                                 $i++ ?></td>
-                                                            <td><?= $cota['mois'] ?></td>
-                                                            <td><?= $cota['annee'] ?></td>
-                                                            <td><?php $total_homme += !isset($cota['homme']) ? 0 : $cota['homme'];
-                                                                echo !isset($cota['homme']) ? 0 : $cota['homme'] ?></td>
-                                                            <td><?php $total_femme += !isset($cota['femme']) ? 0 : $cota['femme'];
-                                                                echo !isset($cota['femme']) ? 0 : $cota['femme'] ?></td>
-                                                            <td><?php $total_ann += (!isset($cota['homme']) ? 0 : $cota['homme']) + (!isset($cota['femme']) ? 0 : $cota['femme']);
-                                                                echo (!isset($cota['homme']) ? 0 : $cota['homme']) + (!isset($cota['femme']) ? 0 : $cota['femme']); ?></td>
+                                                            <td><?= $key ?></td>
+                                                            <td><?php $total_mensuel_homme += !isset($value['total_mensuel_homme'])?0:$value['total_mensuel_homme']; echo !isset($value['total_mensuel_homme'])?0:$value['total_mensuel_homme'] ?></td>
+                                                            <td><?php $total_mensuel_femme += !isset($value['total_mensuel_femme'])?0:$value['total_mensuel_femme']; echo !isset($value['total_mensuel_femme'])?0:$value['total_mensuel_femme'] ?></td>
+                                                            <td><?php $total_ann += $total_partiel; echo $total_partiel ?></td>
                                                         </tr>
                                                     <?php } ?>
                                                 <tfoot>
                                                     <tr>
-                                                        <td colspan="3" align="center">Total</td>
-                                                        <td><?= $total_homme ?></td>
-                                                        <td><?= $total_femme ?></td>
+                                                        <td colspan="2" align="center">Total</td>
+                                                        <td><?= $total_mensuel_homme ?></td>
+                                                        <td><?= $total_mensuel_femme ?></td>
+                                                        <td><?= $total_ann ?></td>
+                                                    </tr>
+                                                </tfoot>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                    <div class="table-responsive">
+                                        <div class="table-responsive mt-3">
+                                            <table class="table">
+                                                <thead>
+                                                    <tr>
+                                                        <th></th>
+                                                        <th></th>
+                                                        <th colspan="2">Cotisations de décès</th>
+                                                        <th></th>
+                                                    </tr>
+                                                    <tr>
+                                                        <th>N°</th>
+                                                        <th>Commune</th>
+                                                        <th>Hommes</th>
+                                                        <th>Femmes</th>
+                                                        <th>Total</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody id="table_body">
+                                                    <?php $i = 1;
+                                                    $total_deces_homme = 0;
+                                                    $total_deces_femme = 0;
+                                                    $total_ann = 0;
+                                                    foreach ($cotisation_deces as $key => $value) { $total_partiel = (!isset($value['total_deces_homme'])?0:$value['total_deces_homme'])+(!isset($value['total_deces_femme'])?0:$value['total_deces_femme'])?>
+                                                        <tr>
+                                                            <td><?= $i;
+                                                                $i++ ?></td>
+                                                            <td><?= $key ?></td>
+                                                            <td><?php $total_deces_homme += !isset($value['total_deces_homme'])?0:$value['total_deces_homme']; echo !isset($value['total_deces_homme'])?0:$value['total_deces_homme'] ?></td>
+                                                            <td><?php $total_deces_femme += !isset($value['total_deces_femme'])?0:$value['total_deces_femme']; echo !isset($value['total_deces_femme'])?0:$value['total_deces_femme'] ?></td>
+                                                            <td><?php $total_ann += $total_partiel; echo $total_partiel ?></td>
+                                                        </tr>
+                                                    <?php } ?>
+                                                <tfoot>
+                                                    <tr>
+                                                        <td colspan="2" align="center">Total</td>
+                                                        <td><?= $total_deces_homme ?></td>
+                                                        <td><?= $total_deces_femme ?></td>
                                                         <td><?= $total_ann ?></td>
                                                     </tr>
                                                 </tfoot>

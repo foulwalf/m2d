@@ -24,7 +24,7 @@ if (isset($_POST['vbtn'])) {
     $inf->execute([$_POST['mois'], $_POST['annee']]);
   } else {
     $inf = $pdo->prepare("SELECT * FROM adherent JOIN cotisation_mensuelle ON adherent.id_adherent = cotisation_mensuelle.adherent JOIN commune ON adherent.commune = commune.ID_COMMUNE WHERE MOIS_COTISATION = ? AND ANNEE_COTISATION = ? AND adherent.commune = ?");
-    $inf->execute([$_POST['mois'], $_POST['annee'], $_SESSION['user_commune']]);
+    $inf->execute([$_POST['mois'], $_POST['annee'], $_SESSION['commune']]);
   }
   $result = $inf->fetchAll(PDO::FETCH_ASSOC);
 }
@@ -73,9 +73,9 @@ if (isset($_POST['vbtn'])) {
                       <div class="col-4">
                         <div>
                           <select class="form-select" id="mois" aria-label="Floating label select example" name="mois" required>
-                            <option selected value="">...</option>
+                            <option value="">...</option>
                             <?php foreach ($month_array_keys as $key) { ?>
-                              <option value="<?= $key ?>"><?= $month_array[$key] ?></option>
+                              <option value="<?= $key ?>" <?php if(isset($_POST['ok']) && $_POST['mois']==$key){echo "selected";}?> ><?= $month_array[$key] ?></option>
                             <?php } ?>
                           </select>
                           <label for="floatingSelect">Mois<span style="color:red">*</span></label>
@@ -84,9 +84,9 @@ if (isset($_POST['vbtn'])) {
                       <div class="col-4">
                         <div class="">
                           <select class="form-select" id="annee" aria-label="Floating label select example" name="annee" required>
-                            <option selected value="">...</option>
+                            <option value="">...</option>
                             <?php for ($i = 2021; $i <= $year; $i++) { ?>
-                              <option value="<?= $i ?>"><?= $i ?></option>
+                              <option value="<?= $i ?>" <?php if(isset($_POST['ok']) && $_POST['annee']==$i){echo "selected";}?> ><?= $i ?></option>
                             <?php } ?>
                           </select>
                           <label for="floatingSelect">Année<span style="color:red">*</span></label>
@@ -99,7 +99,7 @@ if (isset($_POST['vbtn'])) {
                   </form>
                 </div>
                 <div class="table-responsive mt-3">
-                  <?php if (isset($_POST)) { ?>
+                  <?php if (isset($_POST['vbtn'])) { ?>
                     <table class="table">
                       <thead>
                         <tr>

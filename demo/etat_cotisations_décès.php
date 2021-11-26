@@ -9,7 +9,7 @@ if (isset($_POST['vbtn'])) {
         $inf->execute([$_POST['annee']]);
     } else {
         $inf = $pdo->prepare("SELECT *, SUM(MONTANT_COTISATION) as total FROM deces JOIN cotisation_deces ON deces.ID_DECES = cotisation_deces.deces JOIN adherent ON adherent.id_adherent = cotisation_deces.adherent JOIN commune ON commune.ID_COMMUNE = adherent.commune JOIN adherent as decede ON decede.id_adherent = deces.adherent WHERE YEAR(DATE_COTISATION) = ? AND adherent.commune = ? group by ID_DECES, adherent.sexe_adherent");
-        $inf->execute([$_POST['annee'], $_SESSION['user_commune']]);
+        $inf->execute([$_POST['annee'], $_SESSION['commune']]);
     }
     $results = $inf->fetchAll(PDO::FETCH_ASSOC);
     /* echo "<pre>";
@@ -20,6 +20,7 @@ if (isset($_POST['vbtn'])) {
     $hommes = [];
     $femmes = [];
     for ($i = 0; $i < sizeof($results); $i++) {
+        $temp_array = [];
         $temp_array['nom_defunt'] = $results[$i]['nom_adherent'] . " " . $results[$i]['prenom_adherent'];
         $temp_array['date_deces'] = $results[$i]['DATE_DECES'];
         if ($results[$i]['classe'] == 'M') {
@@ -87,7 +88,7 @@ if (isset($_POST['vbtn'])) {
                                                     <select class="form-select" id="annee" aria-label="Floating label select example" required name="annee">
                                                         <option selected value="">...</option>
                                                         <?php for ($i = 2021; $i <= $year; $i++) { ?>
-                                                            <option value="<?= $i ?>"><?= $i ?></option>
+                                                            <option value="<?= $i ?>" <?php if(isset($_POST['vbtn']) && $_POST['annee']==$i){echo "selected";}?>><?= $i ?></option>
                                                         <?php } ?>
                                                     </select>
                                                     <label for="floatingSelect">Année<span style="color:red">*</span></label>
@@ -123,10 +124,10 @@ if (isset($_POST['vbtn'])) {
                                                         <td><?=$i ?></td>
                                                         <td><?= $defunt['nom_defunt'] ?></td>
                                                         <td><?= $defunt['date_deces'] ?></td>
-                                                        <td><?php $total_hommme += $defunt['homme']; echo $defunt['homme'] ?></td>
-                                                        <td><?php $total_hommme += $defunt['femme']; echo $defunt['femme'] ?></td>
-                                                        <td><?php $big_t += intval($defunt['femme']) + intval($defunt['homme']);
-                                                            echo intval($defunt['femme']) + intval($defunt['homme']) ?></td>
+                                                        <td><?php $total_hommme += !isset($defunt['homme'])?0:$defunt['homme']; echo !isset($defunt['homme'])?0:$defunt['homme'] ?></td>
+                                                        <td><?php $total_hommme += !isset($defunt['femme'])?0:$defunt['femme']; echo !isset($defunt['femme'])?0:$defunt['femme'] ?></td>
+                                                        <td><?php $big_t += intval(!isset($defunt['homme'])?0:$defunt['homme']) + intval(!isset($defunt['femme'])?0:$defunt['femme']);
+                                                            echo intval(!isset($defunt['homme'])?0:$defunt['homme']) + intval(!isset($defunt['femme'])?0:$defunt['femme']) ?></td>
                                                     </tr>
                                                 <?php $i++;} ?>
                                             </tbody>
@@ -261,4 +262,4 @@ if (isset($_POST['vbtn'])) {
 </body>
 <!-- Mirrored from www.bootstrapdash.com/demo/skydash/template/demo/horizontal-default-light/pages/tables/data-table.html by HTTrack Website Copier/3.x [XR&CO'2014], Tue, 31 Aug 2021 13:11:32 GMT -->
 
-</html> -->
+</html>

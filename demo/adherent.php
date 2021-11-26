@@ -3,7 +3,7 @@ include('connexion.php');
 if (isset($_POST['ok'])) {
   $inf = $pdo->query("insert into adherent(nom_adherent,prenom_adherent,contact_adherent,email_adherent,sexe_adherent,commune,entreprise_adherent) values('$_POST[nom]','$_POST[prenom]','$_POST[contact]','$_POST[email]','$_POST[sexe]','$_POST[quartier]','$_POST[entreprise]')");
   if ($inf)
-    echo '<script type=text/javascript> myFunction()</script>';
+    echo '<script type=text/javascript> alert("Adhérent ajouté")</script>';
 }
 ?>
 
@@ -91,7 +91,7 @@ if (isset($_POST['ok'])) {
                         <div class="form-group row">
                           <label class="col-sm-3 col-form-label"><strong>CONTACT</strong></label>
                           <div class="col-sm-9">
-                            <input type="text" class="form-control" name="contact" placeholder="contact adherent" required />
+                            <input type="text" class="form-control" name="contact" placeholder="contact adherent"/>
                           </div>
                         </div>
                       </div>
@@ -99,7 +99,7 @@ if (isset($_POST['ok'])) {
                         <div class="form-group row">
                           <label class="col-sm-3 col-form-label"><strong>EMAIL</strong></label>
                           <div class="col-sm-9">
-                            <input type="text" class="form-control" placeholder="email adherent" name="email" required />
+                            <input type="text" class="form-control" placeholder="email adherent" name="email" />
                           </div>
                         </div>
                       </div>

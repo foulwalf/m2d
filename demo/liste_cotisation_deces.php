@@ -9,7 +9,7 @@ if (isset($_POST['vbtn'])) {
     $inf->execute([$_POST['deces']]);
   } else {
     $inf = $pdo->prepare("SELECT * FROM adherent JOIN cotisation_deces ON adherent.id_adherent = cotisation_deces.adherent JOIN commune ON adherent.commune = commune.ID_COMMUNE WHERE cotisation_deces.deces = ? AND commune = ?");
-    $inf->execute([$_POST['deces'], $_SESSION['user_commune']]);
+    $inf->execute([$_POST['deces'], $_SESSION['commune']]);
   }
   $result = $inf->fetchAll(PDO::FETCH_ASSOC);
 }
@@ -59,9 +59,9 @@ if (isset($_POST['vbtn'])) {
                         <div>
                           <input type="hidden" name="method" value="getCotisationDeces">
                           <select class="form-select" id="deces" aria-label="Floating label select example" name="deces">
-                            <option selected value="">...</option>
+                            <option value="">...</option>
                             <?php foreach ($results as $deces) { ?>
-                              <option value="<?= $deces['ID_DECES'] ?>"><?= $deces['nom_adherent'] . " " . $deces['prenom_adherent'] ?></option>
+                              <option value="<?= $deces['ID_DECES'] ?>" <?php if(isset($_POST['vbtn']) && $_POST['deces']==$deces['ID_DECES']){echo "selected";}?> ><?= $deces['nom_adherent'] . " " . $deces['prenom_adherent'] ?></option>
                             <?php } ?>
                           </select>
                           <label for="floatingSelect">Décès<span style="color:red">*</span></label>

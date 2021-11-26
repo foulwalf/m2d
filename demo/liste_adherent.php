@@ -1,10 +1,10 @@
 <?php
 include('connexion.php');
-if ($_SESSION['role']=='admin') {
+if ($_SESSION['role'] == 'admin') {
   $req = $pdo->query("SELECT * from adherent join commune on adherent.commune = commune.ID_COMMUNE where id_adherent not in (select adherent from deces)");
-} else{
+} else {
   $req = $pdo->prepare("SELECT * from adherent join commune on commune.ID_COMMUNE = adherent.commune where id_adherent not in (select adherent from deces) and adherent.commune = ?");
-  $req->execute([$_SESSION['user_commune']]);
+  $req->execute([$_SESSION['commune']]);
 }
 $data = $req->fetchAll();
 
@@ -192,12 +192,14 @@ $data = $req->fetchAll();
                         echo "<td><strong>$v[NOM_COMMUNE]</strong></td>";
                         echo "<td><strong>$v[entreprise_adherent]</strong></td>";
                         echo "<td><a href=index.php?id=update_adherent.php&id1=$v[id_adherent]><button class='btn btn-secondary'>Modifier les infos</button></a></td>";
-                        echo "<td><button class='btn btn-primary cotisation dropdown-toggle' type=button id=dropdownMenuButton1>Cotisations
+                        if ($_SESSION['role'] !== 'admin') {
+                          echo "<td><button class='btn btn-primary cotisation dropdown-toggle' type=button id=dropdownMenuButton1>Cotisations
                         <ul class=dropdown-menu aria-labelledby=dropdownMenuButton1>
                         <li><a class=\"dropdown-item cotisationMensuelleBtn\" data-bs-toggle=modal data-bs-target=#cotisationMensuelModal data-to-send=\"$v[id_adherent],$v[nom_adherent] $v[prenom_adherent]\" data-bs-target=#staticBackdrop2>Cotisations mensuelles</a></li>
                         <li><a class=\"dropdown-item cotisationDecesBtn\" data-bs-toggle=modal data-bs-target=#cotisationDecesModal data-to-send=\"$v[id_adherent],$v[nom_adherent] $v[prenom_adherent]\" data-bs-target=#staticBackdrop2>Cotisations pour les décès</a></li>
                       </ul>
                         </button></td>";
+                        }
                         echo "<td><button class='btn btn-danger add_deces' data-bs-toggle=modal data-bs-target=#exampleModal data-to-send=\"$v[id_adherent],$v[nom_adherent] $v[prenom_adherent]\" data-bs-target=#staticBackdrop1>Marquer le décès</button></></td>";
                         echo "</tr>";
                       }
