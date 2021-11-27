@@ -1,4 +1,8 @@
 <?php
+include('connexion.php');
+$inf1 = $pdo->prepare("SELECT * FROM commune WHERE ID_COMMUNE = ?");
+$inf1->execute(array($_SESSION['commune']));
+$commune = $inf1->fetch();
 $date = new DateTime();
 $month = $date->format("m");
 $year = $date->format("Y");
@@ -70,7 +74,7 @@ if ($_SESSION['role'] == 'admin') {
             <div class="col-md-12 grid-margin">
               <div class="row">
                 <div class="col-12 col-xl-8 mb-4 mb-xl-0">
-                  <h3 class="font-weight-bold">Bienvenue </h3>
+                  <h3 class="font-weight-bold">Bienvenue dans l'espace de gestion M2D<?php if($_SESSION['role'] !== 'admin'){echo ' ,'.$commune['NOM_COMMUNE'];} ?>  </h3>
                 </div>
               </div>
             </div>
@@ -93,7 +97,7 @@ if ($_SESSION['role'] == 'admin') {
                           <font color=red>TOTAL DES MEMBRES DE M2D</font>
                         </strong></p>
                       <p class="fs-30 mb-2"><strong><?php echo $data['nb']; ?></strong></p>
-
+                      <p><?php if($_SESSION['role'] !== 'admin'){echo $commune['NOM_COMMUNE'];} ?></p>
                     </div>
                   </div>
                 </div>

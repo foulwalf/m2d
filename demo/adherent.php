@@ -1,5 +1,8 @@
 <?php
 include('connexion.php');
+$inf1 = $pdo->prepare("SELECT * FROM commune WHERE ID_COMMUNE = ?");
+$inf1->execute(array($_SESSION['commune']));
+$commune = $inf1->fetch();
 if (isset($_POST['ok'])) {
   $inf = $pdo->query("insert into adherent(nom_adherent,prenom_adherent,contact_adherent,email_adherent,sexe_adherent,commune,entreprise_adherent) values('$_POST[nom]','$_POST[prenom]','$_POST[contact]','$_POST[email]','$_POST[sexe]','$_POST[quartier]','$_POST[entreprise]')");
   if ($inf)
@@ -91,7 +94,7 @@ if (isset($_POST['ok'])) {
                         <div class="form-group row">
                           <label class="col-sm-3 col-form-label"><strong>CONTACT</strong></label>
                           <div class="col-sm-9">
-                            <input type="text" class="form-control" name="contact" placeholder="contact adherent"/>
+                            <input type="text" class="form-control" name="contact" placeholder="contact adherent" />
                           </div>
                         </div>
                       </div>
@@ -107,17 +110,11 @@ if (isset($_POST['ok'])) {
                     <div class="row">
                       <div class="col-md-6">
                         <div class="form-group row">
-
-                          <div class="form-group row">
-                            <label class="col-sm-3 col-form-label"><strong>COMMUNE</strong></label>
-                            <div class="input-group col-sm-9 w-75">
-                              <select name="quartier" id="commune" class="form-select" required>
-                                <option value="">...</option>
-                              </select>
-                              <button class="btn btn-primary col-1 d-flex justify-content-center align-items-center" type="button" id="button-addon2" data-bs-toggle="modal" data-bs-target="#exampleModal" data-bs-whatever="@mdo">+</button>
-                            </div>
+                          <label class="col-sm-3 col-form-label"><strong>COMMUNE</strong></label>
+                          <div class="col-sm-9">
+                            <input class="form-control disabled" value="<?= $commune['NOM_COMMUNE'] ?>" required readonly>
+                            <input type = "hidden" name="quartier" id="commune" class="form-control disabled" value="<?= $commune['ID_COMMUNE'] ?>">
                           </div>
-
                         </div>
                       </div>
                       <div class="col-md-6">
@@ -192,7 +189,7 @@ if (isset($_POST['ok'])) {
   <script src="../../../js/select2.js"></script>
   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
   <!-- End custom js for this page-->
-  <script>
+  <!-- <script>
     var btn = document.getElementById('ajouter_commune');
     var input = document.getElementById('input_commune');
     var modal = new bootstrap.Modal(document.getElementById('exampleModal'), {
@@ -269,7 +266,7 @@ if (isset($_POST['ok'])) {
         }
       });
     }
-  </script>
+  </script> -->
 </body>
 
 
