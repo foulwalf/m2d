@@ -8,7 +8,7 @@ if (isset($_POST['vbtn'])) {
         $inf = $pdo->prepare("SELECT *, SUM(MONTANT_COTISATION) as total, adherent.sexe_adherent as classe FROM deces JOIN cotisation_deces ON deces.ID_DECES = cotisation_deces.deces JOIN adherent ON adherent.id_adherent = cotisation_deces.adherent JOIN adherent as decede ON decede.id_adherent = deces.adherent WHERE YEAR(DATE_COTISATION) = ? group by ID_DECES, adherent.sexe_adherent");
         $inf->execute([$_POST['annee']]);
     } else {
-        $inf = $pdo->prepare("SELECT *, SUM(MONTANT_COTISATION) as total FROM deces JOIN cotisation_deces ON deces.ID_DECES = cotisation_deces.deces JOIN adherent ON adherent.id_adherent = cotisation_deces.adherent JOIN commune ON commune.ID_COMMUNE = adherent.commune JOIN adherent as decede ON decede.id_adherent = deces.adherent WHERE YEAR(DATE_COTISATION) = ? AND adherent.commune = ? group by ID_DECES, adherent.sexe_adherent");
+        $inf = $pdo->prepare("SELECT *, SUM(MONTANT_COTISATION) as total, adherent.sexe_adherent as classe FROM deces JOIN cotisation_deces ON deces.ID_DECES = cotisation_deces.deces JOIN adherent ON adherent.id_adherent = cotisation_deces.adherent JOIN commune ON commune.ID_COMMUNE = adherent.commune JOIN adherent as decede ON decede.id_adherent = deces.adherent WHERE YEAR(DATE_COTISATION) = ? AND adherent.commune = ? group by ID_DECES, adherent.sexe_adherent");
         $inf->execute([$_POST['annee'], $_SESSION['commune']]);
     }
     $results = $inf->fetchAll(PDO::FETCH_ASSOC);
@@ -28,18 +28,12 @@ if (isset($_POST['vbtn'])) {
         } else {
             $temp_array['femme'] = $results[$i]['total'];
         }
-        if (!isset($temp_array['femme'])) {
-            $temp_array['femme'] = 0;
-        }
-        if (!isset($temp_array['homme'])) {
-            $temp_array['homme'] = 0;
-        }
         array_push($defunts, $temp_array);
     }
-    // echo "<pre>";
-    // var_dump($defunts);
-    // echo "</pre>";
-    // die;
+    if (isset($_POST['annee'])) {
+        $etat = fopen("etat_cotisations_deces_" . $_POST['annee'] . ".xls", "w");
+        fputs($etat, utf8_decode("N°\tNom du défunt\tDate de décès\tCotisation hommes\tCotisation femmes\tTotal par déces\n"));
+    }
 }
 ?>
 <!DOCTYPE html>
@@ -88,21 +82,26 @@ if (isset($_POST['vbtn'])) {
                                                     <select class="form-select" id="annee" aria-label="Floating label select example" required name="annee">
                                                         <option selected value="">...</option>
                                                         <?php for ($i = 2021; $i <= $year; $i++) { ?>
-                                                            <option value="<?= $i ?>" <?php if(isset($_POST['vbtn']) && $_POST['annee']==$i){echo "selected";}?>><?= $i ?></option>
+                                                            <option value="<?= $i ?>" <?php if (isset($_POST['vbtn']) && $_POST['annee'] == $i) {
+                                                                                            echo "selected";
+                                                                                        } ?>><?= $i ?></option>
                                                         <?php } ?>
                                                     </select>
                                                     <label for="floatingSelect">Année<span style="color:red">*</span></label>
                                                 </div>
                                             </div>
-                                            <div class="col">
+                                            <div class="col-4">
                                                 <button class="btn btn-primary" id="vbtn" type="submit" name="vbtn">Valider</button>
+                                            </div>
+                                            <div class="col-4">
+                                                <?php if (isset($_POST['annee'])) { ?><a class="btn btn-primary" href="./<?= "etat_cotisations_deces_" . $_POST['annee'] . ".xls" ?>">Télécharger</a><?php } ?>
                                             </div>
                                         </div>
 
                                     </form>
                                 </div>
                                 <?php if (isset($defunts) && $defunts != array()) { ?>
-                                    <div class="table-responsive">
+                                    <div class="table-responsive" id="table">
                                         <table class="table">
                                             <thead>
                                                 <tr>
@@ -117,26 +116,33 @@ if (isset($_POST['vbtn'])) {
                                             <tbody>
                                                 <?php $i = 1;
                                                 $big_t = 0;
-                                                $total_hommme=0;
-                                                $total_femme=0;
-                                                foreach ($defunts as $defunt) { ?>
+                                                $total_hommme = 0;
+                                                $total_femme = 0;
+                                                foreach ($defunts as $defunt) {
+                                                    fputs($etat, $i . "\t" . $defunt['nom_defunt'] . "\t" . $defunt['date_deces'] . "\t" . $defunt['homme'] . "\t" . $defunt['femme'] . "\t" . ($defunt['homme'] + $defunt['femme']) . "\n");
+
+                                                ?>
                                                     <tr>
-                                                        <td><?=$i ?></td>
+                                                        <td><?= $i ?></td>
                                                         <td><?= $defunt['nom_defunt'] ?></td>
                                                         <td><?= $defunt['date_deces'] ?></td>
-                                                        <td><?php $total_hommme += !isset($defunt['homme'])?0:$defunt['homme']; echo !isset($defunt['homme'])?0:$defunt['homme'] ?></td>
-                                                        <td><?php $total_hommme += !isset($defunt['femme'])?0:$defunt['femme']; echo !isset($defunt['femme'])?0:$defunt['femme'] ?></td>
-                                                        <td><?php $big_t += intval(!isset($defunt['homme'])?0:$defunt['homme']) + intval(!isset($defunt['femme'])?0:$defunt['femme']);
-                                                            echo intval(!isset($defunt['homme'])?0:$defunt['homme']) + intval(!isset($defunt['femme'])?0:$defunt['femme']) ?></td>
+                                                        <td><?php $total_hommme += !isset($defunt['homme']) ? 0 : $defunt['homme'];
+                                                            echo !isset($defunt['homme']) ? 0 : $defunt['homme'] ?></td>
+                                                        <td><?php $total_hommme += !isset($defunt['femme']) ? 0 : $defunt['femme'];
+                                                            echo !isset($defunt['femme']) ? 0 : $defunt['femme'] ?></td>
+                                                        <td><?php $big_t += intval(!isset($defunt['homme']) ? 0 : $defunt['homme']) + intval(!isset($defunt['femme']) ? 0 : $defunt['femme']);
+                                                            echo intval(!isset($defunt['homme']) ? 0 : $defunt['homme']) + intval(!isset($defunt['femme']) ? 0 : $defunt['femme']) ?></td>
                                                     </tr>
-                                                <?php $i++;} ?>
+                                                <?php $i++;
+                                                } ?>
                                             </tbody>
                                             <tfoot>
                                                 <tr>
+                                                    <?php fputs($etat, "Total" . "\t\t\t" . $total_hommme . "\t" . $total_femme . "\t" . $big_t . "\n"); ?>
                                                     <td colspan="3" align="center">Total</td>
-                                                    <td><?=$total_hommme?></td>
-                                                    <td><?=$total_femme?></td>
-                                                    <td><?=$big_t?></td>
+                                                    <td><?= $total_hommme ?></td>
+                                                    <td><?= $total_femme ?></td>
+                                                    <td><?= $big_t ?></td>
                                                 </tr>
                                             </tfoot>
                                         </table>
@@ -178,6 +184,11 @@ if (isset($_POST['vbtn'])) {
     <script src="../js/data-table.js"></script>
     <!-- End custom js for this page-->
     <script>
+        function print() {
+            preventDefault();
+            window.print();
+
+        }
         /* var mois = document.getElementById('mois')
         var annee = document.getElementById('annee')
         var vbtn = document.getElementById('body')

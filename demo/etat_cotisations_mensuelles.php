@@ -36,18 +36,16 @@ if (isset($_POST['vbtn'])) {
         } else {
             $temp_array['homme'] = $results[$i]['total'];
         }
-        if (!isset($temp_array['femme'])) {
-            $temp_array['femme'] = 0;
-        }
-        if (!isset($temp_array['homme'])) {
-            $temp_array['homme'] = 0;
-        }
         array_push($cotisation, $temp_array);
     }
     // echo '<pre>';
     // var_dump($cotisation);
     // echo '</pre>';
     // die;
+    if (isset($_POST['annee'])) {
+        $etat = fopen("etat_cotisations_mensuelles_" . $_POST['annee'] . ".xls", "w");
+        fputs($etat, utf8_decode("N°\tMois\tAnnée\tCotisation hommes\tCotisation femmes\tTotal\n"));
+    }
 }
 ?>
 <!DOCTYPE html>
@@ -104,8 +102,11 @@ if (isset($_POST['vbtn'])) {
                                                     <label for="floatingSelect">Année<span style="color:red">*</span></label>
                                                 </div>
                                             </div>
-                                            <div class="col">
+                                            <div class="col-4">
                                                 <button class="btn btn-primary" id="vbtn" type="submit" name="vbtn">Valider</button>
+                                            </div>
+                                            <div class="col-4">
+                                                <?php if (isset($_POST['annee'])) { ?><a class="btn btn-primary" href="./<?= "etat_cotisations_mensuelles_" . $_POST['annee'] . ".xls" ?>">Télécharger</a><?php } ?>
                                             </div>
                                         </div>
 
@@ -113,7 +114,7 @@ if (isset($_POST['vbtn'])) {
                                 </div>
                                 <?php if (isset($_POST['vbtn']) && $cotisation !== []) { ?>
                                     <div class="table-responsive">
-                                        <div class="table-responsive mt-3">
+                                        <div class="table-responsive mt-3" id="table">
                                             <table class="table">
                                                 <thead>
                                                     <tr>
@@ -130,7 +131,10 @@ if (isset($_POST['vbtn'])) {
                                                     $total_homme = 0;
                                                     $total_femme = 0;
                                                     $total_ann = 0;
-                                                    foreach ($cotisation as $cota) { ?>
+                                                    foreach ($cotisation as $cota) {
+                                                        fputs($etat, $i . "\t" . $cota['mois'] . "\t" . $cota['annee'] . "\t" . (!isset($cota['homme']) ? 0 : $cota['homme']) . "\t" . (!isset($cota['femme']) ? 0 : $cota['femme']) . "\t" . (!isset($cota['homme']) ? 0 : $cota['homme']) + (!isset($cota['femme']) ? 0 : $cota['femme']) . "\n");
+
+                                                    ?>
                                                         <tr>
                                                             <td><?= $i;
                                                                 $i++ ?></td>
@@ -146,6 +150,7 @@ if (isset($_POST['vbtn'])) {
                                                     <?php } ?>
                                                 <tfoot>
                                                     <tr>
+                                                        <?php fputs($etat, "Total" . "\t\t\t" . $total_homme . "\t" . $total_femme . "\t" . $total_ann . "\n"); ?>
                                                         <td colspan="3" align="center">Total</td>
                                                         <td><?= $total_homme ?></td>
                                                         <td><?= $total_femme ?></td>

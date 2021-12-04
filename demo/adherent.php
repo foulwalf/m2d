@@ -109,62 +109,74 @@ if (isset($_POST['ok'])) {
                     </div>
                     <div class="row">
                       <div class="col-md-6">
-                        <div class="form-group row">
-                          <label class="col-sm-3 col-form-label"><strong>COMMUNE</strong></label>
-                          <div class="col-sm-9">
-                            <input class="form-control disabled" value="<?= $commune['NOM_COMMUNE'] ?>" required readonly>
-                            <input type = "hidden" name="quartier" id="commune" class="form-control disabled" value="<?= $commune['ID_COMMUNE'] ?>">
-                          </div>
-                        </div>
-                      </div>
-                      <div class="col-md-6">
-                        <div class="form-group row">
-                          <label class="col-sm-3 col-form-label"><strong>ENTREPRISE</strong></label>
-                          <div class="col-sm-9">
-                            <input type="text" class="form-control" name="entreprise" placeholder="entreprise  adherent" required />
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                    <div class="row">
-
-                      <div class="col-md-6">
-                        <div class="form-group row">
-                          <label class="col-sm-3 col-form-label"><strong>SEXE</strong></label>
-                          <div class="col-sm-4">
-                            <div class="form-check">
-                              <label class="form-check-label">
-                                <input type="radio" class="form-check-input" name="sexe" id="membershipRadios1" value="M" required>
-                                Masculin
-                              </label>
+                        <?php if ($_SESSION['role'] == 'admin') { ?>
+                          <div class="form-group row">
+                            <label class="col-sm-3 col-form-label"><strong>COMMUNE</strong></label>
+                            <div class="input-group col-sm-9 w-75">
+                              <select name="quartier" id="commune" class="form-select" required>
+                                <option value="">...</option>
+                              </select>
+                              <button class="btn btn-primary col-1 d-flex justify-content-center align-items-center" type="button" id="button-addon2" data-bs-toggle="modal" data-bs-target="#exampleModal" data-bs-whatever="@mdo">+</button>
                             </div>
                           </div>
-                          <div class="col-sm-5">
-                            <div class="form-check">
-                              <label class="form-check-label">
-                                <input type="radio" class="form-check-input" name="sexe" id="membershipRadios2" value="F" required>
-                                Feminin
-                              </label>
+                        <?php } else { ?>
+                          <div class="form-group row">
+                            <label class="col-sm-3 col-form-label"><strong>COMMUNE</strong></label>
+                            <div class="col-sm-9">
+                              <input class="form-control disabled" value="<?= $commune['NOM_COMMUNE'] ?>" required readonly>
+                              <input type="hidden" name="quartier" id="commune" class="form-control disabled" value="<?= $commune['ID_COMMUNE'] ?>">
                             </div>
                           </div>
-                        </div>
+                        <?php } ?>
                       </div>
                     </div>
                     <div class="col-md-6">
-                      <button type="submit" name="ok" class="btn btn-primary me-2">Enregistrer</button>
+                      <div class="form-group row">
+                        <label class="col-sm-3 col-form-label"><strong>ENTREPRISE</strong></label>
+                        <div class="col-sm-9">
+                          <input type="text" class="form-control" name="entreprise" placeholder="entreprise  adherent" required />
+                        </div>
+                      </div>
                     </div>
                 </div>
-                </form>
+                <div class="row">
+                </div>
+                <div class="col-md-6">
+                  <div class="form-group row">
+                    <label class="col-sm-3 col-form-label"><strong>SEXE</strong></label>
+                    <div class="col-sm-4">
+                      <div class="form-check">
+                        <label class="form-check-label">
+                          <input type="radio" class="form-check-input" name="sexe" id="membershipRadios1" value="M" required>
+                          Masculin
+                        </label>
+                      </div>
+                    </div>
+                    <div class="col-sm-5">
+                      <div class="form-check">
+                        <label class="form-check-label">
+                          <input type="radio" class="form-check-input" name="sexe" id="membershipRadios2" value="F" required>
+                          Feminin
+                        </label>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <button type="submit" name="ok" class="btn btn-primary me-2">Enregistrer</button>
               </div>
             </div>
+            </form>
           </div>
-
         </div>
       </div>
-
-      <!-- partial -->
     </div>
-    <!-- main-panel ends -->
+  </div>
+
+  <!-- partial -->
+  </div>
+  <!-- main-panel ends -->
   </div>
   <!-- page-body-wrapper ends -->
   </div>
@@ -189,7 +201,7 @@ if (isset($_POST['ok'])) {
   <script src="../../../js/select2.js"></script>
   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
   <!-- End custom js for this page-->
-  <!-- <script>
+  <script>
     var btn = document.getElementById('ajouter_commune');
     var input = document.getElementById('input_commune');
     var modal = new bootstrap.Modal(document.getElementById('exampleModal'), {
@@ -266,7 +278,7 @@ if (isset($_POST['ok'])) {
         }
       });
     }
-  </script> -->
+  </script>
 </body>
 
 

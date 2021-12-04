@@ -1,4 +1,6 @@
 <?php
+$date = new DateTime();
+$year = $date->format("Y");
 include('connexion.php');
 if ($_SESSION['role'] == 'admin') {
   $req = $pdo->query("SELECT * from adherent join commune on adherent.commune = commune.ID_COMMUNE where id_adherent not in (select adherent from deces)");
@@ -103,6 +105,15 @@ $data = $req->fetchAll();
                   <option value="10">Octobre</option>
                   <option value="11">Novembre</option>
                   <option value="12">Décembre</option>
+                </select>
+              </div>
+              <div class="mb-3">
+                <label for="typeCotisation" class="col-form-label">Année</label>
+                <select required class="form-select" aria-label=".form-select-lg example" name="annee">
+                  <option selected>...</option>
+                  <?php for ($i = 2021; $i <= $year; $i++) { ?>
+                    <option value="<?= $i ?>" <?php if(isset($_POST['ok']) && $_POST['annee']==$i){echo "selected";}?> ><?= $i ?></option>
+                  <?php } ?>
                 </select>
               </div>
               <div class="mb-3">

@@ -19,41 +19,37 @@ if (isset($_POST['vbtn'])) {
     $cotisation_menuselle = [];
     $commune = [];
     for ($i = 0; $i < sizeof($results1); $i++) {
-        
-        if(!isset($cotisation_menuselle[$results1[$i]['NOM_COMMUNE']])){
+
+        if (!isset($cotisation_menuselle[$results1[$i]['NOM_COMMUNE']])) {
             $cotisation_menuselle[$results1[$i]['NOM_COMMUNE']] = [];
         }
         if ($results1[$i]['classe'] == 'M') {
             $cotisation_menuselle[$results1[$i]['NOM_COMMUNE']]['total_mensuel_homme'] = $results1[$i]['total_mensuel'];
         } else {
             $cotisation_menuselle[$results1[$i]['NOM_COMMUNE']]['total_mensuel_femme'] = $results1[$i]['total_mensuel'];
-        } 
-        if(!isset($cotisation_menuselle[$results1[$i]['NOM_COMMUNE']]['total_mensuel_femme'])){
+        }
+        if (!isset($cotisation_menuselle[$results1[$i]['NOM_COMMUNE']]['total_mensuel_femme'])) {
             $cotisation_menuselle[$results1[$i]['NOM_COMMUNE']]['total_mensuel_femme'] = 0;
         }
-        if(!isset($cotisation_menuselle[$results1[$i]['NOM_COMMUNE']]['total_mensuel_homme'])){
+        if (!isset($cotisation_menuselle[$results1[$i]['NOM_COMMUNE']]['total_mensuel_homme'])) {
             $cotisation_menuselle[$results1[$i]['NOM_COMMUNE']]['total_mensuel_homme'] = 0;
         }
         //$temp['total_mensuel_homme'] = $results1[$i]['NOM_COMMUNE'];
     }
     $cotisation_deces = [];
     for ($i = 0; $i < sizeof($results2); $i++) {
-        if(!isset($cotisation_deces[$results2[$i]['NOM_COMMUNE']])){
+        if (!isset($cotisation_deces[$results2[$i]['NOM_COMMUNE']])) {
             $cotisation_deces[$results2[$i]['NOM_COMMUNE']] = [];
         }
         if ($results2[$i]['classe'] == 'M') {
             $cotisation_deces[$results2[$i]['NOM_COMMUNE']]['total_deces_homme'] = $results2[$i]['total_deces'] === null ? 0 : $results2[$i]['total_deces'];
         } else {
             $cotisation_deces[$results2[$i]['NOM_COMMUNE']]['total_deces_femme'] = $results2[$i]['total_deces'] === null ? 0 : $results2[$i]['total_deces'];
-        } 
-        if (!isset($cotisation_deces[$results2[$i]['NOM_COMMUNE']]['total_deces_homme'])){
-            $cotisation_deces[$results2[$i]['NOM_COMMUNE']]['total_deces_homme'] = 0;
-        }
-        if (!isset($cotisation_deces[$results2[$i]['NOM_COMMUNE']]['total_deces_femme'])){
-            $cotisation_deces[$results2[$i]['NOM_COMMUNE']]['total_deces_homme'] = 0;
         }
     }
-
+    if (isset($_POST['annee'])) {
+        $etat = fopen("etat_cotisations_communes_" . $_POST['annee'] . ".xls", "w");
+    }
 }
 ?>
 <!DOCTYPE html>
@@ -102,14 +98,19 @@ if (isset($_POST['vbtn'])) {
                                                     <select class="form-select" id="annee" aria-label="Floating label select example" required name="annee">
                                                         <option selected value="">...</option>
                                                         <?php for ($i = 2021; $i <= $year; $i++) { ?>
-                                                            <option value="<?= $i ?>" <?php if(isset($_POST['vbtn']) && $_POST['annee']==$i){echo "selected";}?>><?= $i ?></option>
+                                                            <option value="<?= $i ?>" <?php if (isset($_POST['vbtn']) && $_POST['annee'] == $i) {
+                                                                                            echo "selected";
+                                                                                        } ?>><?= $i ?></option>
                                                         <?php } ?>
                                                     </select>
                                                     <label for="floatingSelect">Année<span style="color:red">*</span></label>
                                                 </div>
                                             </div>
-                                            <div class="col">
+                                            <div class="col-4">
                                                 <button class="btn btn-primary" id="vbtn" type="submit" name="vbtn">Valider</button>
+                                            </div>
+                                            <div class="col-4">
+                                                <?php if (isset($_POST['annee'])) { ?><a class="btn btn-primary" href="./<?= "etat_cotisations_communes_" . $_POST['annee'] . ".xls" ?>">Télécharger</a><?php } ?>
                                             </div>
                                         </div>
 
@@ -117,7 +118,7 @@ if (isset($_POST['vbtn'])) {
                                 </div>
                                 <?php if (isset($_POST['vbtn']) && $cotisation_deces !== [] && $cotisation_menuselle !== []) { ?>
                                     <div class="table-responsive">
-                                        <div class="table-responsive mt-3">
+                                        <div class="table-responsive mt-3" id="table">
                                             <table class="table">
                                                 <thead>
                                                     <tr>
@@ -136,21 +137,32 @@ if (isset($_POST['vbtn'])) {
                                                 </thead>
                                                 <tbody id="table_body">
                                                     <?php $i = 1;
+                                                    fputs($etat, utf8_decode("Cotisations mensuelles\n"));
+                                                    fputs($etat, utf8_decode("N°\tCommune\tCotisation hommes\tCotisation femmes\tTotal\n"));
                                                     $total_mensuel_homme = 0;
                                                     $total_mensuel_femme = 0;
                                                     $total_ann = 0;
-                                                    foreach ($cotisation_menuselle as $key => $value) { $total_partiel = (!isset($value['total_mensuel_homme'])?0:$value['total_mensuel_homme'])+(!isset($value['total_mensuel_femme'])?0:$value['total_mensuel_femme'])?>
+                                                    foreach ($cotisation_menuselle as $key => $value) {
+                                                        $total_partiel = (!isset($value['total_mensuel_homme']) ? 0 : $value['total_mensuel_homme']) + (!isset($value['total_mensuel_femme']) ? 0 : $value['total_mensuel_femme']);
+                                                        fputs($etat, $i . "\t" . $key . "\t" . (!isset($value['total_mensuel_homme']) ? 0 : $value['total_mensuel_homme']) . "\t" . (!isset($value['total_mensuel_femme']) ? 0 : $value['total_mensuel_femme']) . "\t" . $total_partiel . "\n");
+
+                                                    ?>
                                                         <tr>
                                                             <td><?= $i;
                                                                 $i++ ?></td>
                                                             <td><?= $key ?></td>
-                                                            <td><?php $total_mensuel_homme += !isset($value['total_mensuel_homme'])?0:$value['total_mensuel_homme']; echo !isset($value['total_mensuel_homme'])?0:$value['total_mensuel_homme'] ?></td>
-                                                            <td><?php $total_mensuel_femme += !isset($value['total_mensuel_femme'])?0:$value['total_mensuel_femme']; echo !isset($value['total_mensuel_femme'])?0:$value['total_mensuel_femme'] ?></td>
-                                                            <td><?php $total_ann += $total_partiel; echo $total_partiel ?></td>
+                                                            <td><?php $total_mensuel_homme += !isset($value['total_mensuel_homme']) ? 0 : $value['total_mensuel_homme'];
+                                                                echo !isset($value['total_mensuel_homme']) ? 0 : $value['total_mensuel_homme'] ?></td>
+                                                            <td><?php $total_mensuel_femme += !isset($value['total_mensuel_femme']) ? 0 : $value['total_mensuel_femme'];
+                                                                echo !isset($value['total_mensuel_femme']) ? 0 : $value['total_mensuel_femme'] ?></td>
+                                                            <td><?php $total_ann += $total_partiel;
+                                                                echo $total_partiel ?></td>
                                                         </tr>
                                                     <?php } ?>
                                                 <tfoot>
                                                     <tr>
+                                                        <?php
+                                                        fputs($etat, "Total" . "\t\t" . $total_mensuel_homme . "\t" . $total_mensuel_femme . "\t" . $total_ann . "\n"); ?>
                                                         <td colspan="2" align="center">Total</td>
                                                         <td><?= $total_mensuel_homme ?></td>
                                                         <td><?= $total_mensuel_femme ?></td>
@@ -180,22 +192,33 @@ if (isset($_POST['vbtn'])) {
                                                     </tr>
                                                 </thead>
                                                 <tbody id="table_body">
-                                                    <?php $i = 1;
+                                                    <?php
+                                                    fputs($etat, utf8_decode("Cotisations de décès\n"));
+                                                    fputs($etat, utf8_decode("N°\tCommune\tCotisation hommes\tCotisation femmes\tTotal\n"));
+                                                    $i = 1;
                                                     $total_deces_homme = 0;
                                                     $total_deces_femme = 0;
                                                     $total_ann = 0;
-                                                    foreach ($cotisation_deces as $key => $value) { $total_partiel = (!isset($value['total_deces_homme'])?0:$value['total_deces_homme'])+(!isset($value['total_deces_femme'])?0:$value['total_deces_femme'])?>
+                                                    foreach ($cotisation_deces as $key => $value) {
+                                                        $total_partiel = (!isset($value['total_deces_homme']) ? 0 : $value['total_deces_homme']) + (!isset($value['total_deces_femme']) ? 0 : $value['total_deces_femme']);
+                                                        fputs($etat, $i . "\t" . $key . "\t" . (!isset($value['total_deces_homme']) ? 0 : $value['total_deces_homme']) . "\t" . (!isset($value['total_deces_femme']) ? 0 : $value['total_deces_femme']) . "\t" . $total_partiel . "\n");
+                                                    ?>
                                                         <tr>
                                                             <td><?= $i;
                                                                 $i++ ?></td>
                                                             <td><?= $key ?></td>
-                                                            <td><?php $total_deces_homme += !isset($value['total_deces_homme'])?0:$value['total_deces_homme']; echo !isset($value['total_deces_homme'])?0:$value['total_deces_homme'] ?></td>
-                                                            <td><?php $total_deces_femme += !isset($value['total_deces_femme'])?0:$value['total_deces_femme']; echo !isset($value['total_deces_femme'])?0:$value['total_deces_femme'] ?></td>
-                                                            <td><?php $total_ann += $total_partiel; echo $total_partiel ?></td>
+                                                            <td><?php $total_deces_homme += !isset($value['total_deces_homme']) ? 0 : $value['total_deces_homme'];
+                                                                echo !isset($value['total_deces_homme']) ? 0 : $value['total_deces_homme'] ?></td>
+                                                            <td><?php $total_deces_femme += !isset($value['total_deces_femme']) ? 0 : $value['total_deces_femme'];
+                                                                echo !isset($value['total_deces_femme']) ? 0 : $value['total_deces_femme'] ?></td>
+                                                            <td><?php $total_ann += $total_partiel;
+                                                                echo $total_partiel ?></td>
                                                         </tr>
                                                     <?php } ?>
                                                 <tfoot>
                                                     <tr>
+                                                        <?php
+                                                        fputs($etat, "Total" . "\t\t" . $total_deces_homme . "\t" . $total_deces_femme . "\t" . $total_ann . "\n"); ?>
                                                         <td colspan="2" align="center">Total</td>
                                                         <td><?= $total_deces_homme ?></td>
                                                         <td><?= $total_deces_femme ?></td>

@@ -1,6 +1,6 @@
 <?php
 include('connexion.php');
-$req = $pdo->query("SELECT * from utilisateur JOIN commune on utilisateur.commune = commune.ID_COMMUNE");
+$req = $pdo->query("SELECT * from utilisateur JOIN commune on utilisateur.commune = commune.ID_COMMUNE WHERE role = 'user'");
 $data = $req->fetchAll();
 
 ?>
@@ -69,7 +69,7 @@ $data = $req->fetchAll();
                                                 echo "<td><strong>$v[LOGIN_USER]</strong></td>";
                                                 echo "<td><strong>$v[NOM_COMMUNE]</strong></td>";
                                                 echo "<td><a href=reset_pwd.php?id=$v[ID_USER]><button class='btn btn-primary add_deces'>Réinitialiser le mot de passe</button></a></td>";
-                                                echo "<td><a href=del_user.php?id=$v[ID_USER]><button class='btn btn-danger add_deces'data-bs-target=#staticBackdrop1>Supprimer</button></a></td>";
+                                                echo "<td><a href=del_user.php?id=$v[ID_USER] onclick=\"return confirm('Voulez vous vraiment supprimer cet utlisateur')\"><button class='btn btn-danger add_deces'data-bs-target=#staticBackdrop1>Supprimer</button></a></td>";
                                                 echo "</tr>";
                                             }
                                             ?>

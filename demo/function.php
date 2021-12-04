@@ -71,7 +71,7 @@ if (isset($_POST)) {
         include('connexion.php');
         $inf = $pdo->prepare("INSERT INTO cotisation_mensuelle(MOIS_COTISATION, MONTANT_COTISATION, ANNEE_COTISATION, adherent) VALUES (?,?,?,?)");
         $exec = $inf->execute(
-            [$_POST['mois'], $_POST['montant'], date('Y'), $_POST['adherent']]
+            [$_POST['mois'], $_POST['montant'], $_POST['annee'], $_POST['adherent']]
         );
         if ($exec) {
             echo "<script>alert('Cotisation enregistrée');location.href =\"index.php?id=liste_adherent.php\"</script>";
