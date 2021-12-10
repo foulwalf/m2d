@@ -28,69 +28,139 @@
       </div>
     </div>
   </nav>
-  <nav class="bottom-navbar">
-    <div class="container">
-      <ul class="nav page-navigation">
-        <li class="nav-item">
-          <a class="nav-link" href="index.php?id=tableau.php">
-            <i class="icon-grid menu-icon"></i>
-            <span class="menu-title">Tableau de bords</span>
-          </a>
-        </li>
+  <?php if ($_SESSION['role'] == 'admin') { ?>
+    <nav class="bottom-navbar">
+      <div class="container">
+        <ul class="nav page-navigation">
+          <li class="nav-item">
+            <a class="nav-link" href="index.php?id=tableau.php">
+              <i class="icon-grid menu-icon"></i>
+              <span class="menu-title">Tableau de bords</span>
+            </a>
+          </li>
 
-        <li class="nav-item">
-          <a href="#" class="nav-link">
-            <i class="icon-columns menu-icon"></i>
-            <span class="menu-title">Gestion des Adherents</span>
-            <i class="menu-arrow"></i></a>
-          <div class="submenu">
-            <ul class="submenu-item">
-              <li class="nav-item"><a class="nav-link" href="index.php?id=adherent.php">Nouvel Adherent</a></li>
-              <li class="nav-item"><a class="nav-link" href="index.php?id=liste_adherent.php">Listes</a></li>
-            </ul>
-          </div>
-        </li>
-        <li class="nav-item">
-          <a href="#" class="nav-link">
-            <i class="icon-columns menu-icon"></i>
-            <span class="menu-title">Gestion des Cotisations</span>
-            <i class="menu-arrow"></i></a>
-          <div class="submenu">
-            <ul class="submenu-item">
-              <li class="nav-item"><a class="nav-link" href="index.php?id=liste_adherent_cotisation.php">Mensuel</a></li>
-              <li class="nav-item"><a class="nav-link" href="index.php?id=liste_cotisation_deces.php">De Décès</a></li>
-
-            </ul>
-          </div>
-        </li>
-        <li class="nav-item">
-          <a href="#" class="nav-link">
-            <i class="icon-columns menu-icon"></i>
-            <span class="menu-title">ETAT</span>
-            <i class="menu-arrow"></i></a>
-          <div class="submenu">
-            <ul class="submenu-item">
-              <li class="nav-item"><a class="nav-link" href="index.php?id=etat_cotisations_mensuelles.php">Mensuel</a></li>
-              <li class="nav-item"><a class="nav-link" href="index.php?id=etat_cotisations_décès.php">De Décès</a></li>
-              <?php if ($_SESSION['role'] == "admin") { ?><li class="nav-item"><a class="nav-link" href="index.php?id=etat_cotisations_commune.php">Commune</a></li><?php } ?>
-            </ul>
-          </div>
-        </li>
-        <?php if ($_SESSION['role'] == 'admin') { ?>
           <li class="nav-item">
             <a href="#" class="nav-link">
               <i class="icon-columns menu-icon"></i>
-              <span class="menu-title">Utilisateurs</span>
+              <span class="menu-title">Gestion des Adherents</span>
               <i class="menu-arrow"></i></a>
             <div class="submenu">
               <ul class="submenu-item">
-                <li class="nav-item"><a class="nav-link" href="index.php?id=user.php">Nouvel utilisateur</a></li>
-                <li class="nav-item"><a class="nav-link" href="index.php?id=liste_utilisateur.php">Listes</a></li>
+                <li class="nav-item"><a class="nav-link" href="index.php?id=adherent.php">Nouvel Adherent</a></li>
+                <li class="nav-item"><a class="nav-link" href="index.php?id=liste_adherent_admin.php">Listes</a></li>
               </ul>
             </div>
           </li>
-        <?php } ?>
-      </ul>
-    </div>
-  </nav>
+          <li class="nav-item">
+            <a href="#" class="nav-link">
+              <i class="icon-columns menu-icon"></i>
+              <span class="menu-title">Gestion des Cotisations</span>
+              <i class="menu-arrow"></i></a>
+            <div class="submenu">
+              <ul class="submenu-item">
+                <li class="nav-item"><a class="nav-link" href="index.php?id=liste_adherent_cotisation_admin.php">Mensuel</a></li>
+                <li class="nav-item"><a class="nav-link" href="index.php?id=liste_cotisation_deces.php">De Décès</a></li>
+
+              </ul>
+            </div>
+          </li>
+          <li class="nav-item">
+            <a href="#" class="nav-link">
+              <i class="icon-columns menu-icon"></i>
+              <span class="menu-title">ETAT</span>
+              <i class="menu-arrow"></i></a>
+            <div class="submenu">
+              <ul class="submenu-item">
+                <li class="nav-item"><a class="nav-link" href="index.php?id=etat_cotisations_mensuelles_admin.php">Mensuel</a></li>
+                <li class="nav-item"><a class="nav-link" href="index.php?id=etat_cotisations_deces_admin.php">De Décès</a></li>
+                <?php if ($_SESSION['role'] == "admin") { ?><li class="nav-item"><a class="nav-link" href="index.php?id=etat_cotisations_commune.php">Commune</a></li><?php } ?>
+              </ul>
+            </div>
+          </li>
+          <?php if ($_SESSION['role'] == 'admin') { ?>
+            <li class="nav-item">
+              <a href="#" class="nav-link">
+                <i class="icon-columns menu-icon"></i>
+                <span class="menu-title">Utilisateurs</span>
+                <i class="menu-arrow"></i></a>
+              <div class="submenu">
+                <ul class="submenu-item">
+                  <li class="nav-item"><a class="nav-link" href="index.php?id=user.php">Nouvel utilisateur</a></li>
+                  <li class="nav-item"><a class="nav-link" href="index.php?id=liste_utilisateur.php">Listes</a></li>
+                </ul>
+              </div>
+            </li>
+          <?php } ?>
+        </ul>
+      </div>
+    </nav>
+  <?php } else { ?>
+    <nav class="bottom-navbar">
+      <div class="container">
+        <ul class="nav page-navigation">
+          <li class="nav-item">
+            <a class="nav-link" href="index.php?id=tableau.php">
+              <i class="icon-grid menu-icon"></i>
+              <span class="menu-title">Tableau de bords</span>
+            </a>
+          </li>
+
+          <li class="nav-item">
+            <a href="#" class="nav-link">
+              <i class="icon-columns menu-icon"></i>
+              <span class="menu-title">Gestion des Adherents</span>
+              <i class="menu-arrow"></i></a>
+            <div class="submenu">
+              <ul class="submenu-item">
+                <li class="nav-item"><a class="nav-link" href="index.php?id=adherent.php">Nouvel Adherent</a></li>
+                <li class="nav-item"><a class="nav-link" href="index.php?id=liste_adherent.php">Listes</a></li>
+              </ul>
+            </div>
+          </li>
+          <li class="nav-item">
+            <a href="#" class="nav-link">
+              <i class="icon-columns menu-icon"></i>
+              <span class="menu-title">Gestion des Cotisations</span>
+              <i class="menu-arrow"></i></a>
+            <div class="submenu">
+              <ul class="submenu-item">
+                <li class="nav-item"><a class="nav-link" href="index.php?id=liste_adherent_cotisation.php">Mensuel</a></li>
+                <li class="nav-item"><a class="nav-link" href="index.php?id=liste_cotisation_deces.php">De Décès</a></li>
+
+              </ul>
+            </div>
+          </li>
+          <li class="nav-item">
+            <a href="#" class="nav-link">
+              <i class="icon-columns menu-icon"></i>
+              <span class="menu-title">ETAT</span>
+              <i class="menu-arrow"></i></a>
+            <div class="submenu">
+              <ul class="submenu-item">
+                <li class="nav-item"><a class="nav-link" href="index.php?id=etat_cotisations_mensuelles.php">Mensuel</a></li>
+                <li class="nav-item"><a class="nav-link" href="index.php?id=etat_cotisations_deces.php">De Décès</a></li>
+                <?php if ($_SESSION['role'] == "admin") { ?><li class="nav-item"><a class="nav-link" href="index.php?id=etat_cotisations_commune.php">Commune</a></li><?php } ?>
+              </ul>
+            </div>
+          </li>
+          <?php if ($_SESSION['role'] == 'admin') { ?>
+            <li class="nav-item">
+              <a href="#" class="nav-link">
+                <i class="icon-columns menu-icon"></i>
+                <span class="menu-title">Utilisateurs</span>
+                <i class="menu-arrow"></i></a>
+              <div class="submenu">
+                <ul class="submenu-item">
+                  <li class="nav-item"><a class="nav-link" href="index.php?id=user.php">Nouvel utilisateur</a></li>
+                  <li class="nav-item"><a class="nav-link" href="index.php?id=liste_utilisateur.php">Listes</a></li>
+                </ul>
+              </div>
+            </li>
+          <?php } ?>
+        </ul>
+      </div>
+    </nav>
+  <?php } ?>
+  <?php ?>
+
 </div>

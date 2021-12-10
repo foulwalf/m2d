@@ -87,7 +87,7 @@ if (isset($_POST['vbtn'])) {
             <div class="content-wrapper">
                 <div class="card">
                     <div class="card-body">
-                        <h4 class="card-title">&Eacute;tat des cotisations mensuelles</h4>
+                        <h4 class="card-title">&Eacute;tat des cotisations selon les communes</h4>
                         <div class="row">
                             <div class="col-12">
                                 <div class="row">
